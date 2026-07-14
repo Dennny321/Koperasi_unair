@@ -196,6 +196,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // ESC/POS — cetak langsung ke printer USB/Network
     Route::post('transaksi/{id}/print-escpos', [TransaksiController::class, 'printEscpos'])
         ->name('transaksi.print-escpos');
+    Route::post('transaksi/{id}/print-qz', [TransaksiController::class, 'printQz'])
+        ->name('transaksi.print-qz');
 
 
     Route::resource('transaksi', TransaksiController::class);

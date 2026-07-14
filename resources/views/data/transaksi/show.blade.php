@@ -5,168 +5,168 @@
 @section('page-title', 'Detail Transaksi')
 
 @push('styles')
-<style>
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        margin-bottom: 24px;
-    }
-
-    .info-card {
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
-    }
-
-    .info-card-header {
-        padding: 14px 20px;
-        background: var(--bg-body);
-        border-bottom: 2px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 700;
-        font-size: 14px;
-        color: var(--primary);
-    }
-
-    .info-card-body {
-        padding: 20px;
-    }
-
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 14px;
-        gap: 12px;
-    }
-
-    .info-row:last-child {
-        border-bottom: none;
-    }
-
-    .info-row-label {
-        color: var(--text-secondary);
-        font-weight: 600;
-        flex-shrink: 0;
-    }
-
-    .info-row-value {
-        color: var(--text-primary);
-        text-align: right;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .status-badge.selesai {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .status-badge.batal {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .metode-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        background: rgba(47,50,145,.08);
-        color: var(--primary);
-    }
-
-    /* Tabel produk */
-    .produk-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-    }
-
-    .produk-table thead tr {
-        background: var(--bg-body);
-    }
-
-    .produk-table th {
-        padding: 12px 16px;
-        font-weight: 700;
-        color: var(--text-secondary);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .5px;
-    }
-
-    .produk-table td {
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--border-color);
-        vertical-align: middle;
-    }
-
-    .produk-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .produk-table tbody tr:hover {
-        background: rgba(47,50,145,.03);
-    }
-
-    /* Summary total */
-    .summary-box {
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 13px 24px;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 14px;
-    }
-
-    .summary-row:last-child {
-        border-bottom: none;
-    }
-
-    .summary-row.grand-total {
-        background: var(--primary);
-        color: white;
-        font-size: 18px;
-        font-weight: 700;
-        padding: 18px 24px;
-    }
-
-    .poin-row {
-        background: #fffbeb;
-        border-left: 4px solid #f59e0b;
-    }
-
-    @media (max-width: 768px) {
+    <style>
         .detail-grid {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
         }
-    }
-</style>
+
+        .info-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .info-card-header {
+            padding: 14px 20px;
+            background: var(--bg-body);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .info-card-body {
+            padding: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            gap: 12px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-row-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .info-row-value {
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-badge.selesai {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.batal {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .metode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(47, 50, 145, .08);
+            color: var(--primary);
+        }
+
+        /* Tabel produk */
+        .produk-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .produk-table thead tr {
+            background: var(--bg-body);
+        }
+
+        .produk-table th {
+            padding: 12px 16px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .produk-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .produk-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .produk-table tbody tr:hover {
+            background: rgba(47, 50, 145, .03);
+        }
+
+        /* Summary total */
+        .summary-box {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 24px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row.grand-total {
+            background: var(--primary);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 18px 24px;
+        }
+
+        .poin-row {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+        }
+
+        @media (max-width: 768px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -193,7 +193,7 @@
             </button>
             @if ($transaksi->status === 'selesai' && auth()->user()->role === 'admin')
                 <form action="{{ route($rp . '.transaksi.destroy', $transaksi->id) }}" method="POST"
-                      onsubmit="return confirm('Yakin ingin membatalkan transaksi ini? Stok akan dikembalikan.')">
+                    onsubmit="return confirm('Yakin ingin membatalkan transaksi ini? Stok akan dikembalikan.')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">
@@ -241,7 +241,8 @@
                     <span class="info-row-label">Metode Bayar</span>
                     <span class="info-row-value">
                         <span class="metode-badge">
-                            <i class="fas fa-{{ $transaksi->metode_bayar === 'tunai' ? 'money-bill-wave' : 'credit-card' }}"></i>
+                            <i
+                                class="fas fa-{{ $transaksi->metode_bayar === 'tunai' ? 'money-bill-wave' : 'credit-card' }}"></i>
                             {{ strtoupper($transaksi->metode_bayar) }}
                         </span>
                     </span>
@@ -325,7 +326,8 @@
                             </td>
                             <td style="text-align:center;">
                                 <span style="font-weight:700;">{{ $detail->jumlah }}</span>
-                                <span style="font-size:12px; color:var(--text-secondary);">{{ $detail->produk->satuan }}</span>
+                                <span
+                                    style="font-size:12px; color:var(--text-secondary);">{{ $detail->produk->satuan }}</span>
                             </td>
                             <td style="text-align:right;">Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
                             <td style="text-align:right; font-weight:700;">
@@ -381,11 +383,13 @@
 
     {{-- Loading Overlay --}}
     <div class="print-loading" id="printLoading"
-         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
                 background:rgba(0,0,0,.7); z-index:9999; justify-content:center; align-items:center;">
         <div style="background:white; padding:30px 40px; border-radius:12px; text-align:center;">
-            <div style="border:4px solid #f3f4f6; border-top:4px solid var(--primary); border-radius:50%;
-                        width:40px; height:40px; animation:spin 1s linear infinite; margin:0 auto 16px;"></div>
+            <div
+                style="border:4px solid #f3f4f6; border-top:4px solid var(--primary); border-radius:50%;
+                        width:40px; height:40px; animation:spin 1s linear infinite; margin:0 auto 16px;">
+            </div>
             <h4 style="margin:0;">Mencetak Nota...</h4>
             <p style="margin:8px 0 0; color:var(--text-secondary);">Mohon tunggu sebentar</p>
         </div>
@@ -394,59 +398,146 @@
 @endsection
 
 @push('scripts')
-<script>
-    @if (session('auto_print'))
-        window.addEventListener('DOMContentLoaded', function () {
-            setTimeout(() => { if (confirm('Cetak nota sekarang?')) cetakEscpos(); }, 500);
-        });
-    @endif
+    {{-- QZ Tray Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sha.js/2.4.11/sha.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsrsasign@10.5.25/lib/jsrsasign-all-min.js"></script>
 
-    async function cetakEscpos() {
-        const btn     = document.getElementById('btnCetakEscpos');
-        const loading = document.getElementById('printLoading');
-
-        loading.style.display = 'flex';
-        btn.disabled = true;
-
-        try {
-            const response = await fetch('{{ route($rp . '.transaksi.print-escpos', $transaksi->id) }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+    <script>
+        // ── Auto print setelah transaksi baru ──────────────────────────
+        @if (session('auto_print'))
+            window.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    if (confirm('Cetak nota sekarang?')) cetakEscpos();
+                }, 500);
             });
+        @endif
 
-            const data = await response.json();
-            loading.style.display = 'none';
-            btn.disabled = false;
+        // ── QZ Tray: skip sertifikat (development/LAN) ─────────────────
+        qz.security.setCertificatePromise(() => Promise.resolve());
+        qz.security.setSignatureAlgorithm("SHA512");
+        qz.security.setSignaturePromise(() => Promise.resolve());
 
-            showToast(data.success ? '✅ ' + data.message : '❌ ' + data.message, data.success ? 'success' : 'error');
+        // ── Fungsi utama cetak ─────────────────────────────────────────
+        async function cetakEscpos() {
+            const btn = document.getElementById('btnCetakEscpos');
+            const loading = document.getElementById('printLoading');
 
-        } catch (error) {
-            loading.style.display = 'none';
-            btn.disabled = false;
-            showToast('❌ Gagal terhubung ke printer: ' + error.message, 'error');
+            // Cek QZ Tray terinstall
+            if (typeof qz === 'undefined') {
+                showToast('❌ QZ Tray tidak ditemukan. Download di qz.io', 'error');
+                return;
+            }
+
+            loading.style.display = 'flex';
+            btn.disabled = true;
+
+            try {
+                // 1. Ambil data ESC/POS Base64 dari server
+                const response = await fetch('{{ route($rp . '.transaksi.print-qz', $transaksi->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Gagal generate nota');
+                }
+
+                // 2. Koneksi ke QZ Tray (jika belum konek)
+                if (!qz.websocket.isActive()) {
+                    await qz.websocket.connect();
+                }
+
+                // 3. Cari printer
+                const printerName = data.printer; // dari config printer.name
+                let printer;
+
+                try {
+                    // Coba cari printer dengan nama persis
+                    const printers = await qz.printers.find(printerName);
+                    printer = Array.isArray(printers) ? printers[0] : printers;
+                } catch (e) {
+                    // Jika tidak ketemu, ambil printer default
+                    printer = await qz.printers.getDefault();
+                    showToast('⚠️ Printer "' + printerName + '" tidak ditemukan, pakai printer default: ' + printer,
+                        'error');
+                }
+
+                // 4. Konfigurasi printer RAW (ESC/POS)
+                const config = qz.configs.create(printer, {
+                    rawCommandsOnly: true,
+                    encoding: 'RAW'
+                });
+
+                // 5. Kirim data ESC/POS ke printer
+                await qz.print(config, [{
+                    type: 'raw',
+                    format: 'base64',
+                    data: data.data
+                }]);
+
+                loading.style.display = 'none';
+                btn.disabled = false;
+                showToast('✅ Nota berhasil dicetak ke ' + printer, 'success');
+
+            } catch (error) {
+                loading.style.display = 'none';
+                btn.disabled = false;
+
+                // Pesan error yang lebih ramah
+                let pesan = error.message || 'Gagal cetak';
+                if (pesan.includes('Unable to establish') || pesan.includes('WebSocket')) {
+                    pesan = 'QZ Tray tidak aktif. Pastikan QZ Tray sudah diinstall dan berjalan di laptop.';
+                }
+
+                showToast('❌ ' + pesan, 'error');
+            }
         }
-    }
 
-    function showToast(msg, type = 'success') {
-        const existing = document.getElementById('toastNotif');
-        if (existing) existing.remove();
+        function showToast(msg, type = 'success') {
+            const existing = document.getElementById('toastNotif');
+            if (existing) existing.remove();
 
-        const toast = document.createElement('div');
-        toast.id = 'toastNotif';
-        toast.style.cssText = `
+            const toast = document.createElement('div');
+            toast.id = 'toastNotif';
+            toast.style.cssText = `
             position:fixed; bottom:24px; right:24px; z-index:99999;
             background:${type === 'success' ? '#065f46' : '#991b1b'};
             color:white; padding:16px 24px; border-radius:10px;
             font-size:15px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.3);
-            animation:slideIn .3s ease; max-width:400px;
+            animation:slideIn .3s ease; max-width:400px; line-height:1.5;
         `;
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
-    }
-</script>
-<style>
-    @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-    @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-</style>
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+    </script>
+    <style>
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 @endpush

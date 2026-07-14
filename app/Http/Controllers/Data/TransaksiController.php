@@ -39,11 +39,13 @@ class TransaksiController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('no_transaksi', 'like', "%{$search}%")
-                  ->orWhere('no_nota', 'like', "%{$search}%")
-                  ->orWhereHas('member', fn($q2) => $q2
-                      ->where('name', 'like', "%{$search}%")
-                      ->orWhere('no_telepon', 'like', "%{$search}%")
-                  );
+                    ->orWhere('no_nota', 'like', "%{$search}%")
+                    ->orWhereHas(
+                        'member',
+                        fn($q2) => $q2
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('no_telepon', 'like', "%{$search}%")
+                    );
             });
         }
 
@@ -197,7 +199,6 @@ class TransaksiController extends Controller
                 'success' => true,
                 'message' => 'Nota berhasil dicetak ke printer.',
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -247,7 +248,6 @@ class TransaksiController extends Controller
             return redirect()
                 ->route($rp . '.transaksi.index')
                 ->with('success', 'Transaksi berhasil dibatalkan dan stok dikembalikan.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -326,5 +326,30 @@ class TransaksiController extends Controller
             ->value('no_nota');
         $next = $last ? ((int) substr($last, -4)) + 1 : 1;
         return $prefix . str_pad($next, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate ESC/POS Base64 → dikirim ke browser → QZ Tray cetak ke printer lokal
+     * Route: POST transaksi/{id}/print-qz
+     */
+    public function printQz($id)
+    {
+        $transaksi = Transaksi::with(['kasir', 'member', 'detail.produk', 'riwayatPoin'])
+            ->findOrFail($id);
+
+        try {
+            $base64 = $this->printerService->generateBase64($transaksi);
+
+            return response()->json([
+                'success' => true,
+                'data'    => $base64,
+                'printer' => config('printer.name', 'POS58'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal generate nota: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
