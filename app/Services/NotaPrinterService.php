@@ -6,6 +6,7 @@ use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
+use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 
 class NotaPrinterService
 {
@@ -31,15 +32,15 @@ class NotaPrinterService
      * Dipakai jika server adalah cloud/VPS (tidak bisa akses USB langsung)
      */
     public function generateBase64($transaksi): string
-    {
-        $connector = new \Mike42\Escpos\PrintConnectors\BufferedPrintConnector();
-        $printer   = new Printer($connector);
+{
+    $connector = new DummyPrintConnector();
+    $printer   = new Printer($connector);
 
-        $this->doPrint($printer, $transaksi);
-        $printer->close();
+    $this->doPrint($printer, $transaksi);
+    $printer->close();
 
-        return base64_encode($connector->getData());
-    }
+    return base64_encode($connector->getData());
+}
 
     // ─────────────────────────────────────────────────────────────
     // PRIVATE
