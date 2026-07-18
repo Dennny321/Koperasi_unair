@@ -571,274 +571,201 @@
 <script src="https://cdn.jsdelivr.net/npm/jsrsasign@10.5.25/lib/jsrsasign-all-min.js"></script>
 
 <script>
-    const PRINT_URL = @json(route($rp.'.transaksi.print-qz', $transaksi -> id));
-    const CSRF_TOKEN = @json(csrf_token());
+const PRINT_URL  = @json(route($rp . '.transaksi.print-qz', $transaksi->id));
+const CSRF_TOKEN = @json(csrf_token());
 
-    /* ── LOG HELPERS ──────────────────────────────────────────────── */
-    function openLog() {
-        document.getElementById('printLogPanel').classList.add('visible');
-        document.getElementById('logBody').innerHTML = '';
-        document.getElementById('logBar').style.width = '0%';
-    }
+/* ── LOG HELPERS ──────────────────────────────────────────────── */
+function openLog() {
+    document.getElementById('printLogPanel').classList.add('visible');
+    document.getElementById('logBody').innerHTML = '';
+    document.getElementById('logBar').style.width = '0%';
+}
+function closeLog() {
+    document.getElementById('printLogPanel').classList.remove('visible');
+}
+function setProgress(pct) {
+    document.getElementById('logBar').style.width = pct + '%';
+}
+function setDot(state) {
+    document.getElementById('logDot').className = 'log-dot' + (state !== 'idle' ? ' ' + state : '');
+}
+function log(msg, type = 'info') {
+    const icons = { step:'▶', ok:'✔', err:'✘', warn:'⚠', info:'·', dim:' ' };
+    const now   = new Date().toLocaleTimeString('id-ID', { hour12: false });
+    const body  = document.getElementById('logBody');
+    const line  = document.createElement('div');
+    line.className = `log-line log-${type}`;
+    line.innerHTML =
+        `<span class="log-time">${now}</span>` +
+        `<span class="log-icon">${icons[type] ?? '·'}</span>` +
+        `<span class="log-msg">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+    body.appendChild(line);
+    body.scrollTop = body.scrollHeight;
+}
 
-    function closeLog() {
-        document.getElementById('printLogPanel').classList.remove('visible');
-    }
+/* ── QZ TRAY SECURITY (skip cert — dev/LAN) ──────────────────── */
+qz.security.setCertificatePromise(() => Promise.resolve(''));
+qz.security.setSignatureAlgorithm('SHA512');
+qz.security.setSignaturePromise(() => Promise.resolve(''));
 
-    function setProgress(pct) {
-        document.getElementById('logBar').style.width = pct + '%';
-    }
+/* ── FUNGSI UTAMA CETAK ───────────────────────────────────────── */
+async function cetakQz() {
+    const btn = document.getElementById('btnCetak');
+    btn.disabled = true;
+    document.getElementById('httpsAlert').classList.remove('visible');
 
-    function setDot(state) {
-        document.getElementById('logDot').className = 'log-dot' + (state !== 'idle' ? ' ' + state : '');
-    }
+    openLog();
+    setDot('active');
 
-    function log(msg, type = 'info') {
-        const icons = {
-            step: '▶',
-            ok: '✔',
-            err: '✘',
-            warn: '⚠',
-            info: '·',
-            dim: ' '
-        };
-        const now = new Date().toLocaleTimeString('id-ID', {
-            hour12: false
-        });
-        const body = document.getElementById('logBody');
-        const line = document.createElement('div');
-        line.className = `log-line log-${type}`;
-        line.innerHTML =
-            `<span class="log-time">${now}</span>` +
-            `<span class="log-icon">${icons[type] ?? '·'}</span>` +
-            `<span class="log-msg">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
-        body.appendChild(line);
-        body.scrollTop = body.scrollHeight;
-    }
+    // ── STEP 1: Koneksi QZ Tray ────────────────────────────────────
+    log('Mengecek koneksi QZ Tray...', 'step');
 
-    /* ── QZ TRAY SECURITY (skip cert — dev/LAN) ──────────────────── */
-    qz.security.setCertificatePromise(() => Promise.resolve(''));
-    qz.security.setSignatureAlgorithm('SHA512');
-    qz.security.setSignaturePromise(() => Promise.resolve(''));
-
-    /* ── KONEKSI QZ TRAY DENGAN TIMEOUT ──────────────────────────── */
-    /**
-     * Coba connect ke QZ Tray dengan timeout.
-     * QZ Tray listen di dua port sekaligus:
-     *   ws://localhost:8181   → untuk halaman HTTP
-     *   wss://localhost:8181  → untuk halaman HTTPS (pakai self-signed cert)
-     *
-     * Browser HTTPS memblokir ws:// (mixed content), wajib pakai wss://.
-     * Self-signed cert QZ Tray perlu di-trust sekali di browser.
-     */
-    function connectQz(timeoutMs = 8000) {
-        return new Promise((resolve, reject) => {
-            // Kalau sudah aktif, langsung resolve
-            if (qz.websocket.isActive()) {
-                resolve();
-                return;
-            }
-
-            const timer = setTimeout(() => {
-                reject(new Error(`TIMEOUT — QZ Tray tidak merespons dalam ${timeoutMs/1000} detik`));
-            }, timeoutMs);
-
-            qz.websocket.connect({
-                    retries: 3, // ← naikkan retry
-                    delay: 1,
-                    usingSecure: location.protocol === 'https:',
-                })
-                .then(() => {
-                    clearTimeout(timer);
-                    resolve();
-                })
-                .catch(err => {
-                    clearTimeout(timer);
-                    reject(err);
-                });
-        });
-    }
-    /* ── FUNGSI UTAMA CETAK ───────────────────────────────────────── */
-    async function cetakQz() {
-        const btn = document.getElementById('btnCetak');
-        btn.disabled = true;
-        document.getElementById('httpsAlert').classList.remove('visible');
-
-        openLog();
-        setDot('active');
-
-        // ── STEP 1 & 2 dijalankan PARALEL untuk hemat waktu ───────────
-        // Fetch ESC/POS dari server + siapkan koneksi QZ Tray bersamaan
-        log('Memulai — fetch ESC/POS & koneksi QZ Tray secara paralel...', 'step');
-
-        let escposBase64, printerName;
-
-        // Fetch server (Promise A)
-        const fetchPromise = fetch(PRINT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Accept': 'application/json',
-            }
-        }).then(async res => {
-            log(`Server → HTTP ${res.status} ${res.statusText}`, res.ok ? 'dim' : 'warn');
-            const payload = await res.json();
-            if (!payload.success) {
-                const detail = payload.message ?? 'Unknown error';
-                throw new Error(`Server: ${detail}${payload.exception ? ' (' + payload.exception + ')' : ''}`);
-            }
-            const bytes = Math.round(atob(payload.data).length);
-            log(`ESC/POS OK — ${bytes} bytes, target printer: "${payload.printer}"`, 'ok');
-            return payload;
-        });
-
-        // Koneksi QZ Tray (Promise B)
-        const qzPromise = (async () => {
-            if (qz.websocket.isActive()) {
-                log('QZ Tray — WebSocket sudah aktif ✔', 'ok');
-                return;
-            }
+    try {
+        if (qz.websocket.isActive()) {
+            log('QZ Tray sudah aktif ✔', 'ok');
+        } else {
             const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-            log(`QZ Tray — menghubungkan ke ${proto}://localhost:8181...`, 'dim');
-            await connectQz(6000);
-            log('QZ Tray — WebSocket terhubung ✔', 'ok');
-        })();
+            log(`Menghubungkan ke ${proto}://localhost:8181...`, 'dim');
+            await qz.websocket.connect({
+                retries: 2,
+                delay: 1,
+                usingSecure: location.protocol === 'https:',
+            });
+            log('QZ Tray terhubung ✔', 'ok');
+        }
+    } catch (err) {
+        log('QZ Tray gagal konek: ' + err.message, 'err');
+        if (location.protocol === 'https:') {
+            log('Buka https://localhost:8181 di tab baru lalu trust cert-nya.', 'warn');
+            document.getElementById('httpsAlert').classList.add('visible');
+        } else {
+            log('Pastikan QZ Tray sudah berjalan di taskbar.', 'warn');
+        }
+        finishLog(false, btn);
+        return;
+    }
 
-        // Tunggu keduanya selesai
-        let payload;
+    setProgress(25);
+
+    // ── STEP 2: Fetch ESC/POS dari server ─────────────────────────
+    log('Mengambil data ESC/POS dari server...', 'step');
+
+    let payload;
+    try {
+        const res = await fetch(PRINT_URL, {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json',
+                'X-CSRF-TOKEN' : CSRF_TOKEN,
+                'Accept'       : 'application/json',
+            },
+        });
+
+        log(`Server → HTTP ${res.status} ${res.statusText}`, res.ok ? 'dim' : 'warn');
+        payload = await res.json();
+
+        if (!payload.success) {
+            throw new Error(payload.message ?? 'Unknown error dari server');
+        }
+
+        const bytes = Math.round(atob(payload.data).length);
+        log(`ESC/POS OK — ${bytes} bytes, printer: "${payload.printer}"`, 'ok');
+
+    } catch (err) {
+        log('Gagal ambil data dari server: ' + err.message, 'err');
+        log('Cek storage/logs/laravel.log di server untuk detail.', 'dim');
+        finishLog(false, btn);
+        return;
+    }
+
+    setProgress(50);
+
+    // ── STEP 3: Cari printer ───────────────────────────────────────
+    const printerName = payload.printer ?? 'POS58';
+    log(`Mencari printer: "${printerName}"...`, 'step');
+
+    let resolvedPrinter;
+    try {
+        const found     = await qz.printers.find(printerName);
+        resolvedPrinter = Array.isArray(found) ? found[0] : found;
+        log(`Printer ditemukan: "${resolvedPrinter}" ✔`, 'ok');
+    } catch {
+        log(`Printer "${printerName}" tidak ditemukan, mencoba printer default...`, 'warn');
         try {
-            log(`QZ aktif sebelum Promise.all: ${qz.websocket.isActive()}`, 'info');
-
-            [payload] = await Promise.all([fetchPromise, qzPromise]);
-            escposBase64 = payload.data;
-            printerName = payload.printer ?? 'POS58';
-            setProgress(60);
-        } catch (err) {
-            // Deteksi jenis error untuk panduan yang tepat
-            const msg = err.message ?? String(err);
-
-            if (msg.includes('TIMEOUT') || msg.includes('Unable to establish') || msg.includes('WebSocket')) {
-                // ── Error QZ Tray ──────────────────────────────────────
-                log('', 'dim');
-                log('QZ Tray tidak dapat dihubungi. Kemungkinan penyebab:', 'err');
-
-                if (location.protocol === 'https:') {
-                    log('', 'dim');
-                    log('Halaman ini HTTPS — browser wajib pakai wss://localhost:8181.', 'warn');
-                    log('Sertifikat self-signed QZ Tray belum di-trust browser ini.', 'warn');
-                    log('', 'dim');
-                    log('SOLUSI (cukup sekali per browser):', 'warn');
-                    log('  1. Buka tab baru → ketik: https://localhost:8181', 'dim');
-                    log('  2. Klik "Advanced" → "Proceed to localhost (unsafe)"', 'dim');
-                    log('  3. Tutup tab itu, kembali ke sini, klik Cetak lagi.', 'dim');
-                    // Tampilkan alert di halaman
-                    document.getElementById('httpsAlert').classList.add('visible');
-                    document.getElementById('httpsAlert').scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                } else {
-                    log('  • Pastikan QZ Tray sudah diinstall dan sedang berjalan', 'dim');
-                    log('  • Cek icon QZ Tray di system tray / taskbar', 'dim');
-                    log('  • Download: https://qz.io', 'dim');
-                }
-            } else if (msg.startsWith('Server:')) {
-                // ── Error dari Laravel ─────────────────────────────────
-                log(msg, 'err');
-                log('Cek storage/logs/laravel.log di VPS untuk detail.', 'dim');
-            } else {
-                log(msg, 'err');
-            }
-
+            resolvedPrinter = await qz.printers.getDefault();
+            log(`Printer default: "${resolvedPrinter}"`, 'warn');
+        } catch (e) {
+            log('Tidak ada printer tersedia: ' + e.message, 'err');
+            log('Pastikan printer sudah terpasang dan terinstall di Windows.', 'dim');
             finishLog(false, btn);
             return;
         }
-
-        // ── STEP 3: Cari printer ───────────────────────────────────────
-        log(`Mencari printer: "${printerName}"...`, 'step');
-        let resolvedPrinter;
-
-        try {
-            const found = await qz.printers.find(printerName);
-            resolvedPrinter = Array.isArray(found) ? found[0] : found;
-            log(`Printer ditemukan: "${resolvedPrinter}" ✔`, 'ok');
-        } catch {
-            log(`Printer "${printerName}" tidak ada, pakai printer default...`, 'warn');
-            try {
-                resolvedPrinter = await qz.printers.getDefault();
-                log(`Printer default: "${resolvedPrinter}"`, 'warn');
-            } catch (e) {
-                log(`Tidak ada printer: ${e.message}`, 'err');
-                log('Pastikan printer sudah terpasang dan di-share di Windows.', 'dim');
-                finishLog(false, btn);
-                return;
-            }
-        }
-
-        setProgress(80);
-
-        // ── STEP 4: Kirim ke printer ───────────────────────────────────
-        log(`Mengirim data ke "${resolvedPrinter}"...`, 'step');
-
-        try {
-            const config = qz.configs.create(resolvedPrinter, {
-                rawCommandsOnly: true,
-                encoding: 'RAW',
-            });
-
-            await qz.print(config, [{
-                type: 'raw',
-                format: 'base64',
-                data: escposBase64
-            }]);
-
-            setProgress(100);
-            log(`Nota berhasil dicetak di "${resolvedPrinter}" ✔`, 'ok');
-            finishLog(true, btn);
-
-        } catch (printErr) {
-            log(`Gagal kirim ke printer: ${printErr.message}`, 'err');
-            if (printErr.message.includes('denied') || printErr.message.includes('permission')) {
-                log('Permission ditolak QZ Tray — cek pengaturan site di QZ Tray.', 'warn');
-            } else if (printErr.message.includes('offline')) {
-                log('Printer offline — cek kabel USB atau koneksi LAN printer.', 'warn');
-            }
-            finishLog(false, btn);
-        }
     }
 
-    function finishLog(success, btn) {
-        btn.disabled = false;
-        setDot(success ? 'idle' : 'error');
-        log('─────────────────────────────────────', 'dim');
-        if (success) {
-            showToast('✔ Nota berhasil dicetak!', 'success');
-        } else {
-            showToast('✘ Cetak gagal — lihat log di atas', 'error');
-        }
-    }
+    setProgress(75);
 
-    function showToast(msg, type = 'success') {
-        document.getElementById('toastNotif')?.remove();
-        const t = document.createElement('div');
-        t.id = 'toastNotif';
-        t.style.cssText = `
+    // ── STEP 4: Kirim ke printer ───────────────────────────────────
+    log(`Mengirim data ke "${resolvedPrinter}"...`, 'step');
+
+    try {
+        const config = qz.configs.create(resolvedPrinter, {
+            rawCommandsOnly: true,
+            encoding: 'RAW',
+        });
+
+        await qz.print(config, [{
+            type  : 'raw',
+            format: 'base64',
+            data  : payload.data,
+        }]);
+
+        setProgress(100);
+        log(`Nota berhasil dicetak di "${resolvedPrinter}" ✔`, 'ok');
+        finishLog(true, btn);
+
+    } catch (printErr) {
+        log('Gagal kirim ke printer: ' + printErr.message, 'err');
+        if (printErr.message.includes('denied') || printErr.message.includes('permission')) {
+            log('Permission ditolak — cek pengaturan site di QZ Tray.', 'warn');
+        } else if (printErr.message.includes('offline')) {
+            log('Printer offline — cek kabel USB atau koneksi LAN printer.', 'warn');
+        }
+        finishLog(false, btn);
+    }
+}
+
+/* ── FINISH ───────────────────────────────────────────────────── */
+function finishLog(success, btn) {
+    btn.disabled = false;
+    setDot(success ? 'idle' : 'error');
+    log('─────────────────────────────────────', 'dim');
+    showToast(
+        success ? '✔ Nota berhasil dicetak!' : '✘ Cetak gagal — lihat log di atas',
+        success ? 'success' : 'error'
+    );
+}
+
+function showToast(msg, type = 'success') {
+    document.getElementById('toastNotif')?.remove();
+    const t = document.createElement('div');
+    t.id = 'toastNotif';
+    t.style.cssText = `
         position:fixed; bottom:24px; right:24px; z-index:99999;
         background:${type === 'success' ? '#065f46' : '#991b1b'};
         color:white; padding:16px 24px; border-radius:10px;
         font-size:15px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.3);
         max-width:400px; line-height:1.5;
     `;
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t?.remove(), 6000);
-    }
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t?.remove(), 6000);
+}
 
-    /* ── AUTO PRINT ───────────────────────────────────────────────── */
-    @if(session('auto_print'))
+/* ── AUTO PRINT ───────────────────────────────────────────────── */
+@if (session('auto_print'))
     window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => cetakQz(), 800);
     });
-    @endif
+@endif
 </script>
 @endpush
