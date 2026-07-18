@@ -17,12 +17,18 @@ use App\Http\Controllers\Master\RestockController;
 use App\Http\Controllers\Master\SupplierController;
 use App\Http\Controllers\member\MemberDashboardController;
 use App\Http\Controllers\member\PenukaranController;
+use App\Http\Controllers\QzController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+
+Route::get('/qz/certificate', [QzController::class, 'certificate'])->name('qz.certificate');
+Route::post('/qz/sign', [QzController::class, 'sign'])
+    ->middleware('auth') // sesuaikan middleware yang dipakai rute transaksi kamu
+    ->name('qz.sign');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post')->middleware('guest');
