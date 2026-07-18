@@ -571,8 +571,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jsrsasign@10.5.25/lib/jsrsasign-all-min.js"></script>
 
 <script>
-    const PRINT_URL = @json(route($rp.
-        '.transaksi.print-qz', $transaksi - > id));
+    const PRINT_URL = @json(route($rp.'.transaksi.print-qz', $transaksi -> id));
     const CSRF_TOKEN = @json(csrf_token());
 
     /* ── LOG HELPERS ──────────────────────────────────────────────── */
