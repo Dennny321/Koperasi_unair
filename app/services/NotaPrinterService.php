@@ -6,7 +6,6 @@ use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
-use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 
 class NotaPrinterService
 {
@@ -28,30 +27,32 @@ class NotaPrinterService
     }
 
     /**
-     * Generate raw ESC/POS bytes → dikembalikan sebagai Base64
-     * Dipakai jika server adalah cloud/VPS (tidak bisa akses USB langsung)
+     * Generate raw ESC/POS bytes → dikembalikan sebagai Base64.
+     * Dipakai jika server adalah cloud/VPS (tidak bisa akses USB langsung).
      *
-     * PERBAIKAN: gunakan DummyPrintConnector agar ESC/POS bytes
-     * dikumpulkan di memori, bukan di-output ke php://output.
-     * ob_start() sebelumnya tidak reliable karena FilePrintConnector
-     * memakai fwrite() yang bypass output buffer di beberapa konfigurasi PHP.
+     * Menggunakan ob_start() untuk capture output dari FilePrintConnector('php://output').
+     * Ini lebih reliable daripada DummyPrintConnector yang punya bug getData()
+     * di beberapa versi library mike42/escpos-php.
      */
     public function generateBase64($transaksi): string
     {
-        $connector = new DummyPrintConnector();
+        ob_start();
+
+        $connector = new FilePrintConnector('php://output');
         $printer   = new Printer($connector);
 
         $this->doPrint($printer, $transaksi);
+
+        // close() flush & tutup connector — wajib dipanggil SEBELUM ob_get_clean()
         $printer->close();
 
-        // getData() mengembalikan array of byte-string chunks — implode jadi satu string
-        $chunks   = $connector->getData();
-        $rawBytes = is_array($chunks) ? implode('', $chunks) : (string) $chunks;
+        $rawBytes = ob_get_clean();
 
-        if ($rawBytes === '') {
+        if ($rawBytes === false || $rawBytes === '') {
             throw new \RuntimeException(
-                'ESC/POS data kosong. Pastikan doPrint() benar-benar menulis data ' .
-                'dan DummyPrintConnector::getData() tersedia (mike42/escpos-php >= v3.0).'
+                'ESC/POS data kosong. ob_start() tidak menangkap output dari FilePrintConnector. ' .
+                'Pastikan tidak ada output_buffering = Off di php.ini, ' .
+                'dan tidak ada ob_end_clean() dari middleware lain yang memotong buffer.'
             );
         }
 
