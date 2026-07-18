@@ -43,36 +43,24 @@
     .info-row-label { color: var(--text-secondary); font-weight: 600; flex-shrink: 0; }
     .info-row-value { color: var(--text-primary); text-align: right; }
     .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 14px; border-radius: 20px;
+        font-size: 12px; font-weight: 700;
     }
     .status-badge.selesai { background: #d1fae5; color: #065f46; }
     .status-badge.batal   { background: #fee2e2; color: #991b1b; }
     .metode-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        background: rgba(47,50,145,.08);
-        color: var(--primary);
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 5px 14px; border-radius: 20px;
+        font-size: 12px; font-weight: 700;
+        background: rgba(47,50,145,.08); color: var(--primary);
     }
     .produk-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .produk-table thead tr { background: var(--bg-body); }
     .produk-table th {
-        padding: 12px 16px;
-        font-weight: 700;
-        color: var(--text-secondary);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .5px;
+        padding: 12px 16px; font-weight: 700;
+        color: var(--text-secondary); font-size: 12px;
+        text-transform: uppercase; letter-spacing: .5px;
     }
     .produk-table td {
         padding: 14px 16px;
@@ -82,53 +70,36 @@
     .produk-table tbody tr:last-child td { border-bottom: none; }
     .produk-table tbody tr:hover { background: rgba(47,50,145,.03); }
     .summary-box {
-        background: var(--white);
-        border-radius: 12px;
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
+        background: var(--white); border-radius: 12px;
+        box-shadow: var(--shadow-card); overflow: hidden;
     }
     .summary-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 13px 24px;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 14px;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 13px 24px; border-bottom: 1px solid var(--border-color); font-size: 14px;
     }
     .summary-row:last-child { border-bottom: none; }
     .summary-row.grand-total {
-        background: var(--primary);
-        color: white;
-        font-size: 18px;
-        font-weight: 700;
-        padding: 18px 24px;
+        background: var(--primary); color: white;
+        font-size: 18px; font-weight: 700; padding: 18px 24px;
     }
     .poin-row { background: #fffbeb; border-left: 4px solid #f59e0b; }
 
     /* ── Print Log Panel ── */
     #printLogPanel {
         display: none;
-        background: #0f1117;
-        border-radius: 12px;
-        overflow: hidden;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 24px rgba(0,0,0,.3);
+        background: #0f1117; border-radius: 12px; overflow: hidden;
+        margin-bottom: 24px; box-shadow: 0 4px 24px rgba(0,0,0,.3);
     }
     #printLogPanel.visible { display: block; }
     .log-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 18px;
-        background: #1a1d27;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 18px; background: #1a1d27;
         border-bottom: 1px solid #2d3148;
     }
     .log-header-left { display: flex; align-items: center; gap: 10px; }
     .log-dot {
-        width: 10px; height: 10px;
-        border-radius: 50%;
-        background: #6b7280;
-        transition: background .3s;
+        width: 10px; height: 10px; border-radius: 50%;
+        background: #6b7280; transition: background .3s;
     }
     .log-dot.active { background: #22c55e; animation: pulse-dot 1s ease-in-out infinite; }
     .log-dot.error  { background: #ef4444; animation: none; }
@@ -139,13 +110,9 @@
     }
     .log-close:hover { color: #e5e7eb; }
     #logBody {
-        padding: 14px 18px;
-        font-family: 'Courier New', monospace;
-        font-size: 12.5px;
-        line-height: 1.9;
-        max-height: 280px;
-        overflow-y: auto;
-        color: #9ca3af;
+        padding: 14px 18px; font-family: 'Courier New', monospace;
+        font-size: 12.5px; line-height: 1.9;
+        max-height: 300px; overflow-y: auto; color: #9ca3af;
     }
     .log-line { display: flex; gap: 10px; }
     .log-time { color: #4b5563; flex-shrink: 0; }
@@ -157,29 +124,22 @@
     .log-info .log-msg { color: #60a5fa; }
     .log-dim  .log-msg { color: #6b7280; }
     .log-step .log-msg { color: #a78bfa; font-weight: 600; }
+    .log-progress { height: 3px; background: #1e2030; position: relative; overflow: hidden; }
+    .log-progress-bar { height: 100%; background: linear-gradient(90deg,#6366f1,#818cf8); transition: width .4s ease; width: 0%; }
 
-    .log-progress {
-        height: 3px;
-        background: #1e2030;
-        position: relative;
-        overflow: hidden;
+    /* ── Alert HTTPS ── */
+    #httpsAlert {
+        display: none;
+        background: #fffbeb; border: 1px solid #f59e0b; border-radius: 10px;
+        padding: 16px 20px; margin-bottom: 20px;
+        font-size: 14px; color: #78350f; line-height: 1.7;
     }
-    .log-progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #6366f1, #818cf8);
-        transition: width .4s ease;
-        width: 0%;
-    }
+    #httpsAlert.visible { display: block; }
+    #httpsAlert strong { display: block; margin-bottom: 6px; font-size: 15px; }
+    #httpsAlert a { color: #92400e; font-weight: 600; }
 
-    @keyframes pulse-dot {
-        0%,100% { opacity:1; }
-        50%      { opacity:.4; }
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    @media (max-width: 768px) {
-        .detail-grid { grid-template-columns: 1fr; }
-    }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
 </style>
 @endpush
 
@@ -218,6 +178,20 @@
         </div>
     </div>
 
+    {{-- ── ALERT HTTPS ── --}}
+    {{-- Ditampilkan via JS jika halaman HTTPS dan QZ Tray belum di-trust --}}
+    <div id="httpsAlert">
+        <strong>⚠ Perlu satu kali setup: Trust sertifikat QZ Tray</strong>
+        Halaman ini diakses via <strong>HTTPS</strong>, sehingga browser memblokir koneksi
+        <code>ws://localhost</code> (mixed content). QZ Tray menyediakan WebSocket aman
+        di <code>wss://localhost:8181</code> dengan sertifikat self-signed.<br><br>
+        <strong>Cara trust sertifikat (sekali saja per browser):</strong><br>
+        1. Klik link ini: <a href="https://localhost:8181" target="_blank">https://localhost:8181</a><br>
+        2. Browser akan tampilkan peringatan "Not Secure" — klik <strong>Advanced → Proceed to localhost</strong><br>
+        3. Tutup tab tersebut, lalu klik <strong>Cetak Nota</strong> lagi.<br><br>
+        Setelah sekali trust, langkah ini tidak perlu diulang.
+    </div>
+
     {{-- ── REAL-TIME PRINT LOG ── --}}
     <div id="printLogPanel">
         <div class="log-header">
@@ -231,7 +205,7 @@
         <div id="logBody"></div>
     </div>
 
-    {{-- ── GRID INFO ATAS ── --}}
+    {{-- ── GRID INFO ── --}}
     <div class="detail-grid">
         <div class="info-card">
             <div class="info-card-header"><i class="fas fa-receipt"></i> Informasi Transaksi</div>
@@ -391,222 +365,192 @@
 @endsection
 
 @push('scripts')
-{{-- QZ Tray + crypto libs --}}
 <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sha.js/2.4.11/sha.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsrsasign@10.5.25/lib/jsrsasign-all-min.js"></script>
 
 <script>
-/* ─────────────────────────────────────────────────────────────────
-   CONFIG — sesuaikan jika perlu
-   ─────────────────────────────────────────────────────────────── */
 const PRINT_URL  = @json(route($rp . '.transaksi.print-qz', $transaksi->id));
 const CSRF_TOKEN = @json(csrf_token());
 
-/* ─────────────────────────────────────────────────────────────────
-   LOG PANEL HELPERS
-   ─────────────────────────────────────────────────────────────── */
-let logStarted = false;
-
+/* ── LOG HELPERS ──────────────────────────────────────────────── */
 function openLog() {
-    const panel = document.getElementById('printLogPanel');
-    panel.classList.add('visible');
-    if (!logStarted) {
-        document.getElementById('logBody').innerHTML = '';
-        logStarted = true;
-    }
-    // Scroll panel ke viewport
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('printLogPanel').classList.add('visible');
+    document.getElementById('logBody').innerHTML = '';
+    document.getElementById('logBar').style.width = '0%';
 }
-
 function closeLog() {
     document.getElementById('printLogPanel').classList.remove('visible');
-    logStarted = false;
 }
-
 function setProgress(pct) {
     document.getElementById('logBar').style.width = pct + '%';
 }
-
 function setDot(state) {
-    // state: 'idle' | 'active' | 'error'
-    const dot = document.getElementById('logDot');
-    dot.className = 'log-dot' + (state !== 'idle' ? ' ' + state : '');
+    document.getElementById('logDot').className = 'log-dot' + (state !== 'idle' ? ' ' + state : '');
 }
-
-/**
- * Tambah baris log ke panel.
- * type: 'step' | 'ok' | 'err' | 'warn' | 'info' | 'dim'
- */
 function log(msg, type = 'info') {
-    const icons = {
-        step: '▶', ok: '✔', err: '✘', warn: '⚠', info: '·', dim: ' '
-    };
-    const now = new Date().toLocaleTimeString('id-ID', { hour12: false });
-    const body = document.getElementById('logBody');
-    const line = document.createElement('div');
+    const icons = { step:'▶', ok:'✔', err:'✘', warn:'⚠', info:'·', dim:' ' };
+    const now   = new Date().toLocaleTimeString('id-ID', { hour12: false });
+    const body  = document.getElementById('logBody');
+    const line  = document.createElement('div');
     line.className = `log-line log-${type}`;
     line.innerHTML =
         `<span class="log-time">${now}</span>` +
         `<span class="log-icon">${icons[type] ?? '·'}</span>` +
-        `<span class="log-msg">${escHtml(msg)}</span>`;
+        `<span class="log-msg">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
     body.appendChild(line);
     body.scrollTop = body.scrollHeight;
 }
 
-function escHtml(s) {
-    return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   QZ TRAY — skip sertifikat (development/LAN)
-   Untuk production: isi setCertificatePromise & setSignaturePromise
-   dengan private key yang benar.
-   ─────────────────────────────────────────────────────────────── */
+/* ── QZ TRAY SECURITY (skip cert — dev/LAN) ──────────────────── */
 qz.security.setCertificatePromise(() => Promise.resolve(''));
 qz.security.setSignatureAlgorithm('SHA512');
 qz.security.setSignaturePromise(() => Promise.resolve(''));
 
-/* ─────────────────────────────────────────────────────────────────
-   FUNGSI UTAMA CETAK
-   ─────────────────────────────────────────────────────────────── */
+/* ── KONEKSI QZ TRAY DENGAN TIMEOUT ──────────────────────────── */
+/**
+ * Coba connect ke QZ Tray dengan timeout.
+ * QZ Tray listen di dua port sekaligus:
+ *   ws://localhost:8181   → untuk halaman HTTP
+ *   wss://localhost:8181  → untuk halaman HTTPS (pakai self-signed cert)
+ *
+ * Browser HTTPS memblokir ws:// (mixed content), wajib pakai wss://.
+ * Self-signed cert QZ Tray perlu di-trust sekali di browser.
+ */
+function connectQz(timeoutMs = 5000) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error(`TIMEOUT — QZ Tray tidak merespons dalam ${timeoutMs/1000} detik`));
+        }, timeoutMs);
+
+        qz.websocket.connect({
+            retries: 1,
+            delay: 0.5,
+            // Paksa wss:// jika halaman HTTPS, ws:// jika HTTP
+            usingSecure: location.protocol === 'https:',
+        })
+        .then(() => { clearTimeout(timer); resolve(); })
+        .catch(err => { clearTimeout(timer); reject(err); });
+    });
+}
+
+/* ── FUNGSI UTAMA CETAK ───────────────────────────────────────── */
 async function cetakQz() {
     const btn = document.getElementById('btnCetak');
     btn.disabled = true;
+    document.getElementById('httpsAlert').classList.remove('visible');
 
-    // Buka log panel & reset
-    document.getElementById('logBody').innerHTML = '';
-    logStarted = true;
     openLog();
     setDot('active');
-    setProgress(0);
 
-    // ── STEP 1: Cek QZ Tray library ──────────────────────────────
-    log('Memeriksa library QZ Tray...', 'step');
+    // ── STEP 1 & 2 dijalankan PARALEL untuk hemat waktu ───────────
+    // Fetch ESC/POS dari server + siapkan koneksi QZ Tray bersamaan
+    log('Memulai — fetch ESC/POS & koneksi QZ Tray secara paralel...', 'step');
 
-    if (typeof qz === 'undefined') {
-        log('Library qz-tray.js tidak ditemukan di halaman!', 'err');
-        log('Pastikan tag <script src="qz-tray.min.js"> sudah ada.', 'warn');
-        finishLog(false, btn);
-        return;
-    }
-    log('Library QZ Tray tersedia ✔', 'ok');
-    setProgress(10);
-
-    // ── STEP 2: Ambil ESC/POS Base64 dari server ─────────────────
-    log('Menghubungi server untuk generate data ESC/POS...', 'step');
     let escposBase64, printerName;
 
-    try {
-        const res = await fetch(PRINT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Accept': 'application/json',
-            }
-        });
-
-        log(`Server responded: HTTP ${res.status} ${res.statusText}`, res.ok ? 'dim' : 'warn');
-
+    // Fetch server (Promise A)
+    const fetchPromise = fetch(PRINT_URL, {
+        method : 'POST',
+        headers: {
+            'Content-Type' : 'application/json',
+            'X-CSRF-TOKEN' : CSRF_TOKEN,
+            'Accept'       : 'application/json',
+        }
+    }).then(async res => {
+        log(`Server → HTTP ${res.status} ${res.statusText}`, res.ok ? 'dim' : 'warn');
         const payload = await res.json();
-        log('Response JSON diterima ✔', 'dim');
-
         if (!payload.success) {
-            log(`Server error: ${payload.message ?? 'Unknown error'}`, 'err');
+            const detail = payload.message ?? 'Unknown error';
+            throw new Error(`Server: ${detail}${payload.exception ? ' (' + payload.exception + ')' : ''}`);
+        }
+        const bytes = Math.round(atob(payload.data).length);
+        log(`ESC/POS OK — ${bytes} bytes, target printer: "${payload.printer}"`, 'ok');
+        return payload;
+    });
 
-            // Tampilkan detail jika ada (misal: stack trace dari Laravel)
-            if (payload.exception) log(`Exception: ${payload.exception}`, 'err');
-            if (payload.file)      log(`File: ${payload.file}:${payload.line}`, 'dim');
-
-            finishLog(false, btn);
+    // Koneksi QZ Tray (Promise B)
+    const qzPromise = (async () => {
+        if (qz.websocket.isActive()) {
+            log('QZ Tray — WebSocket sudah aktif ✔', 'ok');
             return;
         }
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        log(`QZ Tray — menghubungkan ke ${proto}://localhost:8181...`, 'dim');
+        await connectQz(6000);
+        log('QZ Tray — WebSocket terhubung ✔', 'ok');
+    })();
 
+    // Tunggu keduanya selesai
+    let payload;
+    try {
+        [payload] = await Promise.all([fetchPromise, qzPromise]);
         escposBase64 = payload.data;
         printerName  = payload.printer ?? 'POS58';
+        setProgress(60);
+    } catch (err) {
+        // Deteksi jenis error untuk panduan yang tepat
+        const msg = err.message ?? String(err);
 
-        const byteLen = Math.round(atob(escposBase64).length);
-        log(`ESC/POS data OK — ${byteLen} bytes, printer target: "${printerName}"`, 'ok');
-        setProgress(35);
+        if (msg.includes('TIMEOUT') || msg.includes('Unable to establish') || msg.includes('WebSocket')) {
+            // ── Error QZ Tray ──────────────────────────────────────
+            log('', 'dim');
+            log('QZ Tray tidak dapat dihubungi. Kemungkinan penyebab:', 'err');
 
-    } catch (fetchErr) {
-        log(`Gagal fetch ke server: ${fetchErr.message}`, 'err');
-        if (fetchErr.message.includes('Failed to fetch')) {
-            log('Kemungkinan CORS, server down, atau URL salah.', 'warn');
-        }
-        finishLog(false, btn);
-        return;
-    }
-
-    // ── STEP 3: Koneksi ke QZ Tray ───────────────────────────────
-    log('Mencoba koneksi ke QZ Tray (WebSocket ws://localhost:8181)...', 'step');
-
-    try {
-        if (qz.websocket.isActive()) {
-            log('WebSocket sudah aktif, skip koneksi ulang.', 'dim');
+            if (location.protocol === 'https:') {
+                log('', 'dim');
+                log('Halaman ini HTTPS — browser wajib pakai wss://localhost:8181.', 'warn');
+                log('Sertifikat self-signed QZ Tray belum di-trust browser ini.', 'warn');
+                log('', 'dim');
+                log('SOLUSI (cukup sekali per browser):', 'warn');
+                log('  1. Buka tab baru → ketik: https://localhost:8181', 'dim');
+                log('  2. Klik "Advanced" → "Proceed to localhost (unsafe)"', 'dim');
+                log('  3. Tutup tab itu, kembali ke sini, klik Cetak lagi.', 'dim');
+                // Tampilkan alert di halaman
+                document.getElementById('httpsAlert').classList.add('visible');
+                document.getElementById('httpsAlert').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                log('  • Pastikan QZ Tray sudah diinstall dan sedang berjalan', 'dim');
+                log('  • Cek icon QZ Tray di system tray / taskbar', 'dim');
+                log('  • Download: https://qz.io', 'dim');
+            }
+        } else if (msg.startsWith('Server:')) {
+            // ── Error dari Laravel ─────────────────────────────────
+            log(msg, 'err');
+            log('Cek storage/logs/laravel.log di VPS untuk detail.', 'dim');
         } else {
-            // QZ Tray default: ws://localhost:8181 dan wss://localhost:8181
-            await qz.websocket.connect({
-                retries: 2,
-                delay: 1,
-            });
-            log('WebSocket terhubung ke QZ Tray ✔', 'ok');
-        }
-        setProgress(55);
-
-    } catch (wsErr) {
-        log(`Gagal koneksi WebSocket: ${wsErr.message}`, 'err');
-
-        if (wsErr.message.includes('Unable to establish') || wsErr.message.toLowerCase().includes('websocket')) {
-            log('QZ Tray tidak berjalan di komputer ini!', 'warn');
-            log('Cara mengatasi:', 'warn');
-            log('  1. Download & install QZ Tray dari https://qz.io', 'dim');
-            log('  2. Jalankan aplikasi QZ Tray (cek system tray/taskbar)', 'dim');
-            log('  3. Izinkan koneksi dari browser jika ada popup QZ Tray', 'dim');
-            log('  4. Pastikan tidak ada firewall yang blokir port 8181', 'dim');
-        } else if (wsErr.message.includes('certificate') || wsErr.message.includes('ssl')) {
-            log('SSL/Certificate error — coba akses halaman via HTTP (bukan HTTPS)', 'warn');
-            log('Atau konfigurasi sertifikat QZ Tray untuk domain HTTPS Anda.', 'dim');
-        } else {
-            log(`Detail: ${wsErr.stack ?? wsErr}`, 'dim');
+            log(msg, 'err');
         }
 
         finishLog(false, btn);
         return;
     }
 
-    // ── STEP 4: Cari printer ─────────────────────────────────────
-    log(`Mencari printer dengan nama: "${printerName}"...`, 'step');
+    // ── STEP 3: Cari printer ───────────────────────────────────────
+    log(`Mencari printer: "${printerName}"...`, 'step');
     let resolvedPrinter;
 
     try {
-        const found = await qz.printers.find(printerName);
+        const found     = await qz.printers.find(printerName);
         resolvedPrinter = Array.isArray(found) ? found[0] : found;
         log(`Printer ditemukan: "${resolvedPrinter}" ✔`, 'ok');
-
-    } catch (findErr) {
-        log(`Printer "${printerName}" tidak ditemukan: ${findErr.message}`, 'warn');
-        log('Mencari printer default...', 'dim');
-
+    } catch {
+        log(`Printer "${printerName}" tidak ada, pakai printer default...`, 'warn');
         try {
             resolvedPrinter = await qz.printers.getDefault();
-            log(`Menggunakan printer default: "${resolvedPrinter}"`, 'warn');
-        } catch (defErr) {
-            log(`Tidak ada printer default: ${defErr.message}`, 'err');
-            log('Pastikan setidaknya satu printer terpasang dan di-share.', 'dim');
+            log(`Printer default: "${resolvedPrinter}"`, 'warn');
+        } catch (e) {
+            log(`Tidak ada printer: ${e.message}`, 'err');
+            log('Pastikan printer sudah terpasang dan di-share di Windows.', 'dim');
             finishLog(false, btn);
             return;
         }
     }
 
-    setProgress(70);
+    setProgress(80);
 
-    // ── STEP 5: Konfigurasi & kirim ke printer ───────────────────
-    log(`Mengirim data ESC/POS ke printer "${resolvedPrinter}"...`, 'step');
+    // ── STEP 4: Kirim ke printer ───────────────────────────────────
+    log(`Mengirim data ke "${resolvedPrinter}"...`, 'step');
 
     try {
         const config = qz.configs.create(resolvedPrinter, {
@@ -614,27 +558,19 @@ async function cetakQz() {
             encoding: 'RAW',
         });
 
-        await qz.print(config, [{
-            type: 'raw',
-            format: 'base64',
-            data: escposBase64,
-        }]);
+        await qz.print(config, [{ type: 'raw', format: 'base64', data: escposBase64 }]);
 
         setProgress(100);
-        log(`Nota berhasil dikirim ke printer "${resolvedPrinter}" ✔`, 'ok');
+        log(`Nota berhasil dicetak di "${resolvedPrinter}" ✔`, 'ok');
         finishLog(true, btn);
 
     } catch (printErr) {
         log(`Gagal kirim ke printer: ${printErr.message}`, 'err');
-
         if (printErr.message.includes('denied') || printErr.message.includes('permission')) {
-            log('Akses ke printer ditolak. Cek permission di pengaturan QZ Tray.', 'warn');
-        } else if (printErr.message.includes('offline') || printErr.message.includes('not ready')) {
-            log('Printer offline atau tidak siap. Cek koneksi USB/LAN printer.', 'warn');
-        } else {
-            log(`Stack: ${printErr.stack ?? printErr}`, 'dim');
+            log('Permission ditolak QZ Tray — cek pengaturan site di QZ Tray.', 'warn');
+        } else if (printErr.message.includes('offline')) {
+            log('Printer offline — cek kabel USB atau koneksi LAN printer.', 'warn');
         }
-
         finishLog(false, btn);
     }
 }
@@ -642,51 +578,35 @@ async function cetakQz() {
 function finishLog(success, btn) {
     btn.disabled = false;
     setDot(success ? 'idle' : 'error');
-
+    log('─────────────────────────────────────', 'dim');
     if (success) {
-        log('─── Selesai ───', 'dim');
         showToast('✔ Nota berhasil dicetak!', 'success');
     } else {
-        log('─── Proses dihentikan karena error ───', 'dim');
-        log('Scroll ke atas log untuk melihat detail error.', 'dim');
-        showToast('✘ Cetak gagal — lihat log untuk detail', 'error');
+        showToast('✘ Cetak gagal — lihat log di atas', 'error');
     }
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   TOAST
-   ─────────────────────────────────────────────────────────────── */
 function showToast(msg, type = 'success') {
-    const el = document.getElementById('toastNotif');
-    if (el) el.remove();
-
-    const toast = document.createElement('div');
-    toast.id = 'toastNotif';
-    toast.style.cssText = `
+    document.getElementById('toastNotif')?.remove();
+    const t = document.createElement('div');
+    t.id = 'toastNotif';
+    t.style.cssText = `
         position:fixed; bottom:24px; right:24px; z-index:99999;
         background:${type === 'success' ? '#065f46' : '#991b1b'};
         color:white; padding:16px 24px; border-radius:10px;
         font-size:15px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.3);
         max-width:400px; line-height:1.5;
     `;
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast?.remove(), 6000);
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t?.remove(), 6000);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   AUTO PRINT setelah transaksi baru berhasil disimpan
-   ─────────────────────────────────────────────────────────────── */
+/* ── AUTO PRINT ───────────────────────────────────────────────── */
 @if (session('auto_print'))
     window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (confirm('Cetak nota sekarang?')) cetakQz();
-        }, 600);
+        setTimeout(() => cetakQz(), 800);
     });
 @endif
 </script>
-
-<style>
-    @keyframes spin { to { transform: rotate(360deg); } }
-</style>
 @endpush
