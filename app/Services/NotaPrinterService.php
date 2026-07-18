@@ -44,13 +44,14 @@ class NotaPrinterService
         $this->doPrint($printer, $transaksi);
         $printer->close();
 
-        // getData() mengembalikan raw ESC/POS bytes sebagai string
-        $rawBytes = $connector->getData();
+        // getData() mengembalikan array of byte-string chunks — implode jadi satu string
+        $chunks   = $connector->getData();
+        $rawBytes = is_array($chunks) ? implode('', $chunks) : (string) $chunks;
 
-        if (empty($rawBytes)) {
+        if ($rawBytes === '') {
             throw new \RuntimeException(
-                'ESC/POS data kosong. Pastikan library mike42/escpos-php terinstall ' .
-                'dan DummyPrintConnector::getData() tersedia (>= v3.0).'
+                'ESC/POS data kosong. Pastikan doPrint() benar-benar menulis data ' .
+                'dan DummyPrintConnector::getData() tersedia (mike42/escpos-php >= v3.0).'
             );
         }
 
