@@ -30,20 +30,32 @@ class NotaPrinterService
     /**
      * Generate raw ESC/POS bytes → dikembalikan sebagai Base64
      * Dipakai jika server adalah cloud/VPS (tidak bisa akses USB langsung)
+     *
+     * PERBAIKAN: gunakan DummyPrintConnector agar ESC/POS bytes
+     * dikumpulkan di memori, bukan di-output ke php://output.
+     * ob_start() sebelumnya tidak reliable karena FilePrintConnector
+     * memakai fwrite() yang bypass output buffer di beberapa konfigurasi PHP.
      */
     public function generateBase64($transaksi): string
-{
-    ob_start();
-    
-    $connector = new FilePrintConnector('php://output');
-    $printer   = new Printer($connector);
-    $this->doPrint($printer, $transaksi);
-    $printer->close();
-    
-    $data = ob_get_clean();
-    
-    return base64_encode($data);
-}
+    {
+        $connector = new DummyPrintConnector();
+        $printer   = new Printer($connector);
+
+        $this->doPrint($printer, $transaksi);
+        $printer->close();
+
+        // getData() mengembalikan raw ESC/POS bytes sebagai string
+        $rawBytes = $connector->getData();
+
+        if (empty($rawBytes)) {
+            throw new \RuntimeException(
+                'ESC/POS data kosong. Pastikan library mike42/escpos-php terinstall ' .
+                'dan DummyPrintConnector::getData() tersedia (>= v3.0).'
+            );
+        }
+
+        return base64_encode($rawBytes);
+    }
 
     // ─────────────────────────────────────────────────────────────
     // PRIVATE
@@ -103,7 +115,6 @@ class NotaPrinterService
         foreach ($transaksi->detail as $item) {
             $nama = $item->produk?->nama ?? 'Produk';
 
-            // Wrap nama produk jika panjang
             foreach ($this->wordWrap($nama, $lebar) as $i => $line) {
                 if ($i === 0) {
                     $printer->setEmphasis(true);
@@ -189,14 +200,12 @@ class NotaPrinterService
 
     /**
      * Format 2 kolom rata kiri-kanan
-     * Contoh: "Subtotal            Rp 50.000"
      */
     private function row(string $kiri, string $kanan, int $lebar): string
     {
         $maxKiri = $lebar - strlen($kanan);
 
         if ($maxKiri < 1) {
-            // Jika kanan sudah memenuhi lebar, print 2 baris
             return $kiri . "\n" . str_pad($kanan, $lebar, ' ', STR_PAD_LEFT) . "\n";
         }
 
