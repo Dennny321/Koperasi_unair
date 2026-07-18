@@ -33,13 +33,16 @@ class NotaPrinterService
      */
     public function generateBase64($transaksi): string
 {
-    $connector = new DummyPrintConnector();
+    ob_start();
+    
+    $connector = new FilePrintConnector('php://output');
     $printer   = new Printer($connector);
-
     $this->doPrint($printer, $transaksi);
     $printer->close();
-
-    return base64_encode($connector->getData());
+    
+    $data = ob_get_clean();
+    
+    return base64_encode($data);
 }
 
     // ─────────────────────────────────────────────────────────────
