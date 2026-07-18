@@ -751,7 +751,7 @@
         try {
             const config = qz.configs.create(resolvedPrinter, {
                 rawCommandsOnly: true,
-                encoding: 'RAW',
+                encoding: 'CP437', // umum untuk printer thermal ESC/POS
             });
 
             await qz.print(config, [{
