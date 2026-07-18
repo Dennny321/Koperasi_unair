@@ -628,7 +628,7 @@
             .catch(reject);
     });
 
-    qz.security.setSignatureAlgorithm('SHA512');
+    qz.security.setSignatureAlgorithm('SHA256');
 
     qz.security.setSignaturePromise(function(toSign) {
         return function(resolve, reject) {

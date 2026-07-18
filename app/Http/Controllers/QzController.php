@@ -51,7 +51,7 @@ class QzController extends Controller
         }
 
         $signature = '';
-        $ok = openssl_sign($request->input('request'), $signature, $privateKey, OPENSSL_ALGO_SHA512);
+        $ok = openssl_sign($request->input('request'), $signature, $privateKey, OPENSSL_ALGO_SHA256);
 
         if (!$ok) {
             return response()->json([
