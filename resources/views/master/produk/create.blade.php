@@ -74,8 +74,9 @@
                 <!-- Kolom Kanan -->
                 <div>
                     <div class="form-group">
-                        <label class="form-label required">Stok</label>
-                        <input type="number" name="stok" class="form-control @error('stok') is-invalid @enderror" value="{{ old('stok', 0) }}" placeholder="0" min="0" required>
+                        <label class="form-label">Stok</label>
+                       <input type="number" name="stok" class="form-control" value="0" placeholder="0" min="0" readonly style="background-color: var(--bg-body); cursor: not-allowed; opacity: 0.7;">
+<small class="form-text text-muted"><i class="fas fa-lock"></i> Stok dikelola otomatis melalui transaksi restock</small>
                         @error('stok')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror

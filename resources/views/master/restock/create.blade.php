@@ -273,7 +273,7 @@
                         <option value="">Pilih Produk</option>
                         @foreach ($produks as $produk)
                             <option value="{{ $produk->id }}" data-kode="{{ $produk->kode_produk }}"
-                                data-stok="{{ $produk->stok }}" data-harga="{{ $produk->harga }}"
+                                data-stok="{{ $produk->stok ?? 0 }}" data-harga="{{ $produk->harga }}"
                                 data-satuan="{{ $produk->satuan }}">
                                 {{ $produk->nama }} ({{ $produk->kategori->nama ?? 'No Category' }})
                             </option>
@@ -364,15 +364,16 @@
         // Map kode_produk (lowercase) -> data produk, untuk lookup hasil scan barcode
         const produkMap = {};
         @foreach ($produks as $produk)
-            produkMap['{{ strtolower($produk->kode_produk) }}'] = {
-                id: {{ $produk->id }},
-                harga: {{ $produk->harga }},
-                satuan: '{{ $produk->satuan }}',
-                stok: {{ $produk->stok }},
-                kode: '{{ $produk->kode_produk }}',
-                nama: '{{ addslashes($produk->nama) }}',
-                text: '{{ addslashes($produk->nama) }} ({{ addslashes($produk->kategori->nama ?? 'No Category') }})',
-            };
+           // SESUDAH
+produkMap['{{ strtolower($produk->kode_produk) }}'] = {
+    id: {{ $produk->id }},
+    harga: {{ $produk->harga ?? 0 }},
+    satuan: '{{ addslashes($produk->satuan) }}',
+    stok: {{ $produk->stok ?? 0 }},
+    kode: '{{ addslashes($produk->kode_produk) }}',
+    nama: '{{ addslashes($produk->nama) }}',
+    text: '{{ addslashes($produk->nama) }} ({{ addslashes($produk->kategori->nama ?? "No Category") }})',
+};
         @endforeach
 
         /* ═══════════════ TAMBAH / HAPUS PRODUK ═══════════════ */
@@ -447,7 +448,7 @@
         function formatProdukOption(option) {
             if (!option.id) return option.text;
             const el = option.element;
-            const stok = parseInt(el.dataset.stok ?? 0);
+            const stok = parseInt(el.dataset.stok || 0);
             const sat = el.dataset.satuan ?? '';
             const cls = stok > 5 ? 'stok-ok' : stok > 0 ? 'stok-low' : 'stok-nil';
             const lab = `Stok: ${stok} ${sat}`;
