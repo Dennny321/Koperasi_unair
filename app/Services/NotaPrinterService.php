@@ -93,11 +93,11 @@ class NotaPrinterService
         $printer->setTextSize(1, 1);
         $printer->setEmphasis(false);
         $printer->text("Koperasi Pegawai Univ. Airlangga\n");
-        $printer->text("Kampus B Unair, Surabaya\n");
+        $printer->text("Kampus C Unair, Surabaya\n");
         $printer->text(str_repeat('-', $lebar) . "\n");
 
         // ── NOMOR NOTA ──────────────────────────────────────────────
-        $printer->text("No. Nota / Surat Jalan\n");
+        $printer->text("No. Nota\n");
         $printer->setEmphasis(true);
         $printer->setTextSize(1, 2);
         $noNota = $transaksi->no_nota ?? $transaksi->no_transaksi;
@@ -167,7 +167,7 @@ class NotaPrinterService
 
         $printer->setJustification(Printer::JUSTIFY_CENTER);
         $printer->setEmphasis(true);
-        $printer->text("*** $metode ***\n");
+        $printer->text("*** PEMBAYARAN: $metode ***\n");
         $printer->setEmphasis(false);
 
         // ── MEMBER + POIN (jika ada) ─────────────────────────────────
@@ -189,7 +189,7 @@ class NotaPrinterService
         // ── FOOTER ───────────────────────────────────────────────────
         $printer->setJustification(Printer::JUSTIFY_CENTER);
         $printer->text(str_repeat('-', $lebar) . "\n");
-        $printer->text("Terima kasih atas kunjungan Anda!\n");
+        $printer->text("Terima kasih atas kunjungan Anda\n");
         $printer->text("Barang yang sudah dibeli\n");
         $printer->text("tidak dapat dikembalikan.\n");
         $printer->feed(1);

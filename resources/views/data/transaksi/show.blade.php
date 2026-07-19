@@ -255,12 +255,12 @@
         color: #d1d5db;
     }
 
-    .log-ok .log-msg    { color: #4ade80; }
-    .log-err .log-msg   { color: #f87171; }
-    .log-warn .log-msg  { color: #fbbf24; }
-    .log-info .log-msg  { color: #60a5fa; }
-    .log-dim .log-msg   { color: #6b7280; }
-    .log-step .log-msg  { color: #a78bfa; font-weight: 600; }
+    .log-ok .log-msg   { color: #4ade80; }
+    .log-err .log-msg  { color: #f87171; }
+    .log-warn .log-msg { color: #fbbf24; }
+    .log-info .log-msg { color: #60a5fa; }
+    .log-dim .log-msg  { color: #6b7280; }
+    .log-step .log-msg { color: #a78bfa; font-weight: 600; }
 
     .log-progress {
         height: 3px;
@@ -309,6 +309,12 @@
         <button type="button" class="btn btn-primary" onclick="cetakPolling()" id="btnCetak">
             <i class="fas fa-print"></i> Cetak Nota
         </button>
+
+        {{-- Tombol log, muncul setelah tombol cetak diklik --}}
+        <button type="button" class="btn btn-secondary" onclick="toggleLog()" id="btnLog" style="display:none;">
+            <i class="fas fa-terminal"></i> Lihat Log
+        </button>
+
         @if ($transaksi->status === 'selesai' && auth()->user()->role === 'admin')
         <form action="{{ route($rp . '.transaksi.destroy', $transaksi->id) }}" method="POST"
             onsubmit="return confirm('Yakin ingin membatalkan transaksi ini?')">
@@ -324,14 +330,14 @@
     </div>
 </div>
 
-{{-- ── PRINT LOG PANEL — wajib ada sebelum detail-grid ── --}}
+{{-- ── PRINT LOG PANEL ── --}}
 <div id="printLogPanel">
     <div class="log-header">
         <div class="log-header-left">
             <div class="log-dot" id="logDot"></div>
             <span class="log-title">Print Log — Polling Agent</span>
         </div>
-        <button class="log-close" onclick="closeLog()" title="Tutup log">×</button>
+        <button class="log-close" onclick="toggleLog()" title="Tutup log">×</button>
     </div>
     <div class="log-progress">
         <div class="log-progress-bar" id="logBar"></div>
@@ -505,22 +511,47 @@ const PUSH_URL     = "{{ url('/api/print-jobs') }}";
 const CSRF_TOKEN   = @json(csrf_token());
 const TRANSAKSI_ID = @json($transaksi->id);
 
-/* ── HELPERS ─────────────────────────────────────────────────── */
 function getEl(id) { return document.getElementById(id); }
 
+/* ── LOG PANEL ───────────────────────────────────────────────── */
 function openLog() {
-    const panel = getEl('printLogPanel');
-    const body  = getEl('logBody');
-    const bar   = getEl('logBar');
-    if (!panel || !body || !bar) return;
-    panel.classList.add('visible');
-    body.innerHTML   = '';
-    bar.style.width  = '0%';
+    const body = getEl('logBody');
+    const bar  = getEl('logBar');
+    if (body) body.innerHTML = '';
+    if (bar)  bar.style.width = '0%';
+
+    // Sembunyikan panel, reset tombol log
+    const panel  = getEl('printLogPanel');
+    const btnLog = getEl('btnLog');
+    if (panel)  panel.classList.remove('visible');
+    if (btnLog) {
+        btnLog.style.display = '';
+        btnLog.innerHTML = '<i class="fas fa-terminal"></i> Lihat Log';
+    }
 }
 
-function closeLog() {
-    const panel = getEl('printLogPanel');
-    if (panel) panel.classList.remove('visible');
+function toggleLog() {
+    const panel  = getEl('printLogPanel');
+    const btnLog = getEl('btnLog');
+    if (!panel) return;
+    const isVisible = panel.classList.contains('visible');
+    panel.classList.toggle('visible');
+    if (btnLog) {
+        btnLog.innerHTML = isVisible
+            ? '<i class="fas fa-terminal"></i> Lihat Log'
+            : '<i class="fas fa-terminal"></i> Sembunyikan Log';
+    }
+}
+
+function showLogOnError() {
+    const panel  = getEl('printLogPanel');
+    const btnLog = getEl('btnLog');
+    if (panel && !panel.classList.contains('visible')) {
+        panel.classList.add('visible');
+    }
+    if (btnLog) {
+        btnLog.innerHTML = '<i class="fas fa-terminal"></i> Sembunyikan Log';
+    }
 }
 
 function setProgress(pct) {
@@ -540,8 +571,8 @@ function log(msg, type = 'info') {
     const icons = { step:'▶', ok:'✔', err:'✘', warn:'⚠', info:'·', dim:' ' };
     const now   = new Date().toLocaleTimeString('id-ID', { hour12: false });
     const line  = document.createElement('div');
-    line.className   = `log-line log-${type}`;
-    line.innerHTML   =
+    line.className = `log-line log-${type}`;
+    line.innerHTML =
         `<span class="log-time">${now}</span>` +
         `<span class="log-icon">${icons[type] ?? '·'}</span>` +
         `<span class="log-msg">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
@@ -556,10 +587,8 @@ async function cetakPolling() {
 
     openLog();
     setDot('active');
-
-    // STEP 1 — Kirim job ke antrian
-    log('Mengirim job cetak ke antrian server...', 'step');
     setProgress(20);
+    log('Mengirim job cetak ke antrian server...', 'step');
 
     let jobId;
     try {
@@ -580,6 +609,7 @@ async function cetakPolling() {
     } catch (err) {
         log('Gagal kirim ke server: ' + err.message, 'err');
         log('Pastikan route /api/print-jobs sudah ditambahkan di routes/api.php', 'dim');
+        showLogOnError();
         finishLog(false, btn);
         return;
     }
@@ -610,6 +640,7 @@ async function cetakPolling() {
                 break;
             } else if (status === 'failed') {
                 log('Agent gagal cetak: ' + (data.job?.error_message ?? '-'), 'err');
+                showLogOnError();
                 break;
             } else {
                 log(`Status: ${status} (${elapsed / 1000}s)...`, 'dim');
@@ -623,6 +654,7 @@ async function cetakPolling() {
         log('Nota berhasil dicetak oleh printer agent ✔', 'ok');
     } else if (elapsed >= maxWait * 1000) {
         log(`Timeout ${maxWait}s — pastikan print_agent.py jalan di PC kasir.`, 'warn');
+        showLogOnError();
     }
 
     finishLog(printed, btn);
