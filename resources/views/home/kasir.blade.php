@@ -172,10 +172,7 @@
                 <i class="fas fa-file-alt" style="font-size:18px;color:var(--info);"></i>
                 <span>Surat Jalan</span>
             </a>
-            <a href="{{ route('kasir.produk.index') }}" class="btn-kasir-menu">
-                <i class="fas fa-box" style="font-size:18px;color:var(--warning);"></i>
-                <span>Lihat Produk</span>
-            </a>
+          
             <a href="{{ route('kasir.member.index') }}" class="btn-kasir-menu">
                 <i class="fas fa-users" style="font-size:18px;" style="color:#8b5cf6;"></i>
                 <span>Lihat Member</span>
