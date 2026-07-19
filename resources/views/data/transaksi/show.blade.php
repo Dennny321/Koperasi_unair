@@ -255,30 +255,12 @@
         color: #d1d5db;
     }
 
-    .log-ok .log-msg {
-        color: #4ade80;
-    }
-
-    .log-err .log-msg {
-        color: #f87171;
-    }
-
-    .log-warn .log-msg {
-        color: #fbbf24;
-    }
-
-    .log-info .log-msg {
-        color: #60a5fa;
-    }
-
-    .log-dim .log-msg {
-        color: #6b7280;
-    }
-
-    .log-step .log-msg {
-        color: #a78bfa;
-        font-weight: 600;
-    }
+    .log-ok .log-msg    { color: #4ade80; }
+    .log-err .log-msg   { color: #f87171; }
+    .log-warn .log-msg  { color: #fbbf24; }
+    .log-info .log-msg  { color: #60a5fa; }
+    .log-dim .log-msg   { color: #6b7280; }
+    .log-step .log-msg  { color: #a78bfa; font-weight: 600; }
 
     .log-progress {
         height: 3px;
@@ -294,44 +276,9 @@
         width: 0%;
     }
 
-    /* ── Alert HTTPS ── */
-    #httpsAlert {
-        display: none;
-        background: #fffbeb;
-        border: 1px solid #f59e0b;
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        color: #78350f;
-        line-height: 1.7;
-    }
-
-    #httpsAlert.visible {
-        display: block;
-    }
-
-    #httpsAlert strong {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 15px;
-    }
-
-    #httpsAlert a {
-        color: #92400e;
-        font-weight: 600;
-    }
-
     @keyframes pulse-dot {
-
-        0%,
-        100% {
-            opacity: 1
-        }
-
-        50% {
-            opacity: .4
-        }
+        0%, 100% { opacity: 1; }
+        50%       { opacity: .4; }
     }
 
     @media (max-width: 768px) {
@@ -377,6 +324,20 @@
     </div>
 </div>
 
+{{-- ── PRINT LOG PANEL — wajib ada sebelum detail-grid ── --}}
+<div id="printLogPanel">
+    <div class="log-header">
+        <div class="log-header-left">
+            <div class="log-dot" id="logDot"></div>
+            <span class="log-title">Print Log — Polling Agent</span>
+        </div>
+        <button class="log-close" onclick="closeLog()" title="Tutup log">×</button>
+    </div>
+    <div class="log-progress">
+        <div class="log-progress-bar" id="logBar"></div>
+    </div>
+    <div id="logBody"></div>
+</div>
 
 {{-- ── GRID INFO ── --}}
 <div class="detail-grid">
@@ -535,176 +496,170 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
 <script>
-    const PUSH_URL = "{{ url('/api/print-jobs') }}";
-    const STATUS_URL = (id) => `/api/print-jobs/${id}/status`;
-    const CSRF_TOKEN = @json(csrf_token());
-    const TRANSAKSI_ID = @json($transaksi -> id);
+const PUSH_URL     = "{{ url('/api/print-jobs') }}";
+const CSRF_TOKEN   = @json(csrf_token());
+const TRANSAKSI_ID = @json($transaksi->id);
 
-    /* ── LOG HELPERS (sama seperti sebelumnya) ───────────────────── */
-    function openLog() {
-        document.getElementById('printLogPanel').classList.add('visible');
-        document.getElementById('logBody').innerHTML = '';
-        document.getElementById('logBar').style.width = '0%';
-    }
+/* ── HELPERS ─────────────────────────────────────────────────── */
+function getEl(id) { return document.getElementById(id); }
 
-    function closeLog() {
-        document.getElementById('printLogPanel').classList.remove('visible');
-    }
+function openLog() {
+    const panel = getEl('printLogPanel');
+    const body  = getEl('logBody');
+    const bar   = getEl('logBar');
+    if (!panel || !body || !bar) return;
+    panel.classList.add('visible');
+    body.innerHTML   = '';
+    bar.style.width  = '0%';
+}
 
-    function setProgress(pct) {
-        document.getElementById('logBar').style.width = pct + '%';
-    }
+function closeLog() {
+    const panel = getEl('printLogPanel');
+    if (panel) panel.classList.remove('visible');
+}
 
-    function setDot(state) {
-        document.getElementById('logDot').className = 'log-dot' + (state !== 'idle' ? ' ' + state : '');
-    }
+function setProgress(pct) {
+    const bar = getEl('logBar');
+    if (bar) bar.style.width = pct + '%';
+}
 
-    function log(msg, type = 'info') {
-        const icons = {
-            step: '▶',
-            ok: '✔',
-            err: '✘',
-            warn: '⚠',
-            info: '·',
-            dim: ' '
-        };
-        const now = new Date().toLocaleTimeString('id-ID', {
-            hour12: false
+function setDot(state) {
+    const dot = getEl('logDot');
+    if (!dot) return;
+    dot.className = 'log-dot' + (state !== 'idle' ? ' ' + state : '');
+}
+
+function log(msg, type = 'info') {
+    const body = getEl('logBody');
+    if (!body) return;
+    const icons = { step:'▶', ok:'✔', err:'✘', warn:'⚠', info:'·', dim:' ' };
+    const now   = new Date().toLocaleTimeString('id-ID', { hour12: false });
+    const line  = document.createElement('div');
+    line.className   = `log-line log-${type}`;
+    line.innerHTML   =
+        `<span class="log-time">${now}</span>` +
+        `<span class="log-icon">${icons[type] ?? '·'}</span>` +
+        `<span class="log-msg">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+    body.appendChild(line);
+    body.scrollTop = body.scrollHeight;
+}
+
+/* ── CETAK POLLING ───────────────────────────────────────────── */
+async function cetakPolling() {
+    const btn = getEl('btnCetak');
+    if (btn) btn.disabled = true;
+
+    openLog();
+    setDot('active');
+
+    // STEP 1 — Kirim job ke antrian
+    log('Mengirim job cetak ke antrian server...', 'step');
+    setProgress(20);
+
+    let jobId;
+    try {
+        const res  = await fetch(PUSH_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Accept':       'application/json',
+            },
+            body: JSON.stringify({ transaksi_id: TRANSAKSI_ID }),
         });
-        const body = document.getElementById('logBody');
-        const line = document.createElement('div');
-        line.className = `log-line log-${type}`;
-        line.innerHTML =
-            `<span class="log-time">${now}</span>` +
-            `<span class="log-icon">${icons[type] ?? '·'}</span>` +
-            `<span class="log-msg">${String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
-        body.appendChild(line);
-        body.scrollTop = body.scrollHeight;
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message ?? 'Gagal push job');
+        jobId = data.job_id;
+        log(`Job #${jobId} berhasil masuk antrian ✔`, 'ok');
+        setProgress(40);
+    } catch (err) {
+        log('Gagal kirim ke server: ' + err.message, 'err');
+        log('Pastikan route /api/print-jobs sudah ditambahkan di routes/api.php', 'dim');
+        finishLog(false, btn);
+        return;
     }
 
-    /* ── FUNGSI UTAMA CETAK POLLING ──────────────────────────────── */
-    async function cetakPolling() {
-        const btn = document.getElementById('btnCetak');
-        btn.disabled = true;
-        openLog();
-        setDot('active');
+    // STEP 2 — Tunggu Python agent cetak
+    log('Menunggu printer agent mencetak...', 'step');
+    log('(Python di PC kasir akan ambil job ini tiap 2 detik)', 'dim');
+    setProgress(60);
 
-        // ── STEP 1: Kirim job ke antrian ──────────────────────────────
-        log('Mengirim job cetak ke antrian server...', 'step');
-        setProgress(20);
+    const maxWait  = 30;
+    const interval = 2000;
+    let elapsed    = 0;
+    let printed    = false;
 
-        let jobId;
+    while (elapsed < maxWait * 1000) {
+        await new Promise(r => setTimeout(r, interval));
+        elapsed += interval;
+
         try {
-            const res = await fetch(PUSH_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    transaksi_id: TRANSAKSI_ID
-                }),
+            const res  = await fetch(`/api/print-jobs/${jobId}/status`, {
+                headers: { 'Accept': 'application/json' }
             });
-
             const data = await res.json();
-            if (!data.success) throw new Error(data.message ?? 'Gagal push job');
+            const status = data.job?.status;
 
-            jobId = data.job_id;
-            log(`Job #${jobId} berhasil masuk antrian ✔`, 'ok');
-            setProgress(40);
-
-        } catch (err) {
-            log('Gagal kirim ke server: ' + err.message, 'err');
-            finishLog(false, btn);
-            return;
-        }
-
-        // ── STEP 2: Tunggu konfirmasi dari agent Python ───────────────
-        log('Menunggu printer agent mencetak...', 'step');
-        log('(Printer agent di PC kasir akan mengambil job ini)', 'dim');
-        setProgress(60);
-
-        let printed = false;
-        const maxWait = 30; // detik maksimal tunggu
-        const interval = 2000; // cek tiap 2 detik
-        let elapsed = 0;
-
-        while (elapsed < maxWait * 1000) {
-            await new Promise(r => setTimeout(r, interval));
-            elapsed += interval;
-
-            try {
-                const res = await fetch(STATUS_URL(jobId), {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                const data = await res.json();
-                const status = data.job?.status;
-
-                if (status === 'done') {
-                    printed = true;
-                    break;
-                } else if (status === 'failed') {
-                    log('Agent gagal cetak: ' + (data.job?.error_message ?? '-'), 'err');
-                    break;
-                } else {
-                    // masih pending/processing — lanjut tunggu
-                    log(`Status: ${status} (${elapsed / 1000}s)...`, 'dim');
-                }
-            } catch {
-                // network error saat polling — lanjut saja
+            if (status === 'done') {
+                printed = true;
+                break;
+            } else if (status === 'failed') {
+                log('Agent gagal cetak: ' + (data.job?.error_message ?? '-'), 'err');
+                break;
+            } else {
+                log(`Status: ${status} (${elapsed / 1000}s)...`, 'dim');
             }
-        }
-
-        setProgress(100);
-
-        if (printed) {
-            log('Nota berhasil dicetak oleh printer agent ✔', 'ok');
-        } else if (elapsed >= maxWait * 1000) {
-            log(`Timeout ${maxWait} detik — pastikan printer agent berjalan di PC kasir.`, 'warn');
-        }
-
-        finishLog(printed, btn);
+        } catch { /* lanjut */ }
     }
 
-    /* ── FINISH ──────────────────────────────────────────────────── */
-    function finishLog(success, btn) {
-        btn.disabled = false;
-        setDot(success ? 'idle' : 'error');
-        log('─────────────────────────────────────', 'dim');
-        showToast(
-            success ? '✔ Nota berhasil dicetak!' : '✘ Cetak gagal — lihat log di atas',
-            success ? 'success' : 'error'
-        );
+    setProgress(100);
+
+    if (printed) {
+        log('Nota berhasil dicetak oleh printer agent ✔', 'ok');
+    } else if (elapsed >= maxWait * 1000) {
+        log(`Timeout ${maxWait}s — pastikan print_agent.py jalan di PC kasir.`, 'warn');
     }
 
-    function showToast(msg, type = 'success') {
-        document.getElementById('toastNotif')?.remove();
-        const t = document.createElement('div');
-        t.id = 'toastNotif';
-        t.style.cssText = `
-            position:fixed; bottom:24px; right:24px; z-index:99999;
-            background:${type === 'success' ? '#065f46' : '#991b1b'};
-            color:white; padding:16px 24px; border-radius:10px;
-            font-size:15px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.3);
-            max-width:400px; line-height:1.5;
-        `;
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t?.remove(), 6000);
-    }
+    finishLog(printed, btn);
+}
 
-    /* ── AUTO PRINT ──────────────────────────────────────────────── */
-    @if(session('auto_print'))
-    window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => cetakPolling(), 800);
-    });
-    @endif
+/* ── FINISH ──────────────────────────────────────────────────── */
+function finishLog(success, btn) {
+    if (btn) btn.disabled = false;
+    setDot(success ? 'idle' : 'error');
+    log('─────────────────────────────────────', 'dim');
+    showToast(
+        success ? '✔ Nota berhasil dicetak!' : '✘ Cetak gagal — lihat log di atas',
+        success ? 'success' : 'error'
+    );
+}
+
+function showToast(msg, type = 'success') {
+    getEl('toastNotif')?.remove();
+    const t = document.createElement('div');
+    t.id = 'toastNotif';
+    t.style.cssText = `
+        position:fixed; bottom:24px; right:24px; z-index:99999;
+        background:${type === 'success' ? '#065f46' : '#991b1b'};
+        color:white; padding:16px 24px; border-radius:10px;
+        font-size:15px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.3);
+        max-width:400px; line-height:1.5;
+    `;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t?.remove(), 6000);
+}
+
+/* ── AUTO PRINT ──────────────────────────────────────────────── */
+@if(session('auto_print'))
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => cetakPolling(), 800);
+});
+@endif
 </script>
 @endpush
