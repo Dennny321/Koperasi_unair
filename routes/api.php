@@ -9,7 +9,7 @@ Route::get('/print-jobs/poll', [PrintJobController::class, 'poll']);
 Route::post('/print-jobs/{id}/result', [PrintJobController::class, 'result']);
 
 // ── Dipanggil browser kasir (pakai session login biasa) ─────────
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::post('/print-jobs', [PrintJobController::class, 'push']);
     Route::get('/print-jobs/{id}/status', [PrintJobController::class, 'status']);
 });
