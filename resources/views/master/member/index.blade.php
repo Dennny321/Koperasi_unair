@@ -8,7 +8,7 @@
 @php $prefix = auth()->user()->role === 'admin' ? 'admin' : 'kasir'; @endphp
 <div class="content-header">
     <div>
-        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Manajemen Member 👥</h2>
+        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Manajemen Member </h2>
         <p style="color: var(--text-secondary);">Kelola semua data member koperasi di sini</p>
     </div>
     <a href="{{ route($prefix.'.member.create') }}" class="btn btn-primary">

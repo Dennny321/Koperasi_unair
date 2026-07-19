@@ -591,7 +591,7 @@
 <div class="content-header" style="margin-bottom: 32px;">
     <div>
         <h2 style="color:#1e293b; font-size:28px; font-weight:800; margin-bottom:6px;">
-            📊 Laporan Penjualan
+             Laporan Penjualan
         </h2>
         <p style="color:#64748b; font-size:14px; font-weight:500;">
             Rekap dan analisis seluruh transaksi penjualan koperasi

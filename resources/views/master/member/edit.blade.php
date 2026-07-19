@@ -58,7 +58,7 @@
 
 <div class="content-header">
     <div>
-        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Edit Data Member ✏️</h2>
+        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Edit Data Member </h2>
         <p style="color: var(--text-secondary);">Perbarui informasi member</p>
     </div>
     <a href="{{ route($prefix.'.member.index') }}" class="btn btn-warning">

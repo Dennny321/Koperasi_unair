@@ -8,7 +8,7 @@
 @php $prefix = auth()->user()->role === 'admin' ? 'admin' : 'kasir'; @endphp
 <div class="content-header">
     <div>
-        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Detail Member 👤</h2>
+        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Detail Member </h2>
         <p style="color: var(--text-secondary);">Informasi lengkap data member</p>
     </div>
     <div style="display: flex; gap: 8px;">

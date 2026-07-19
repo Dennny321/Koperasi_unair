@@ -7,7 +7,7 @@
 @section('content')
 <div class="content-header">
     <div>
-        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Log Aktivitas 📋</h2>
+        <h2 style="color: var(--primary); font-size: 28px; margin-bottom: 4px;">Log Aktivitas </h2>
         <p style="color: var(--text-secondary);">Rekaman seluruh aktivitas pengguna di sistem</p>
     </div>
 

@@ -442,7 +442,6 @@
 <div class="page-header">
     <div class="header-content">
         <h2>
-            <i class="fas fa-file-alt"></i>
             Surat Jalan
         </h2>
         <p>Kelola surat jalan & cetak invoice pengiriman barang</p>
