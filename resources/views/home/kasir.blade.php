@@ -133,7 +133,7 @@
                     @forelse($transaksiTerbaru as $t)
                     <tr>
                         <td><code style="font-size:11px;">{{ $t->no_transaksi }}</code></td>
-                        <td>{{ $t->member?->name ?? '<span style="color:#aaa;font-size:12px;">Umum</span>' }}</td>
+                        <td>{{ $t->member?->name ?? 'Umum' }}</td>
                         <td style="font-weight:600;">Rp {{ number_format($t->total_harga, 0, ',', '.') }}</td>
                         <td>
                             <span class="badge" style="background:{{ $t->metode_bayar === 'tunai' ? 'var(--success)' : 'var(--info)' }};color:#fff;font-size:10px;">
