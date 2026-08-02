@@ -46,12 +46,6 @@
             <div style="font-size: 28px; font-weight: 800; color: #fd7e14; line-height: 1;">{{ $stats['kasir'] }}</div>
             <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">operator transaksi</div>
         </div>
-        {{-- Member --}}
-        {{-- <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid #28a745; border-radius: var(--radius); padding: 16px 18px;">
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); margin-bottom: 6px;">Member</div>
-        <div style="font-size: 28px; font-weight: 800; color: #28a745; line-height: 1;">{{ $stats['member'] }}</div>
-        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">pelanggan terdaftar</div>
-    </div> --}}
     </div>
 
     {{-- ── FILTER BAR ── --}}
@@ -112,7 +106,6 @@
                         <th>Email</th>
                         <th>No. Telepon</th>
                         <th style="text-align: center;">Role</th>
-                        <th style="text-align: right;">Saldo Poin</th>
                         <th>Bergabung</th>
                         <th style="width: 160px; text-align: center;">Aksi</th>
                     </tr>
@@ -180,18 +173,6 @@
                                 @endif
                             </td>
 
-                            {{-- Saldo Poin --}}
-                            <td style="text-align: right;">
-                                @if ($item->isMember())
-                                    <span style="font-weight: 700; color: var(--primary);">
-                                        {{ number_format($item->saldo_poin, 0, ',', '.') }}
-                                    </span>
-                                    <span style="font-size: 11px; color: var(--text-secondary);"> poin</span>
-                                @else
-                                    <span style="color: var(--text-secondary);">-</span>
-                                @endif
-                            </td>
-
                             <td style="font-size: 12px; color: var(--text-secondary);">
                                 {{ $item->created_at->format('d/m/Y') }}
                             </td>
@@ -207,17 +188,6 @@
                                         title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    {{-- Reset Password --}}
-                                    {{-- <form action="{{ route('admin.user.reset-password', $item->id) }}" method="POST"
-                                  style="display:inline;"
-                                  onsubmit="return confirm('Reset password {{ $item->name }} ke \'password123\'?')">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-sm"
-                                    style="background:#6f42c1; color:#fff; border:none;" title="Reset Password">
-                                    <i class="fas fa-key"></i>
-                                </button>
-                            </form> --}}
                                     {{-- Hapus --}}
                                     @if ($item->id !== auth()->id())
                                         <form action="{{ route('admin.user.destroy', $item->id) }}" method="POST"
@@ -240,7 +210,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center" style="padding: 40px;">
+                            <td colspan="7" class="text-center" style="padding: 40px;">
                                 <i class="fas fa-users"
                                     style="font-size: 48px; color: var(--text-secondary); margin-bottom: 16px; display:block;"></i>
                                 <p style="color: var(--text-secondary); font-size: 16px;">Tidak ada data user</p>

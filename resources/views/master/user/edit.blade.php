@@ -120,38 +120,18 @@
                         <div class="form-group">
                             <label class="form-label required">Role</label>
                             <select name="role" class="form-control @error('role') is-invalid @enderror" required
-                                id="roleSelect" onchange="togglePoinField()"
+                                id="roleSelect" onchange="toggleRoleInfo()"
                                 {{ $user->id === auth()->id() ? 'disabled' : '' }}>
-                                <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin
-                                </option>
-                                <option value="kasir" {{ old('role', $user->role) == 'kasir' ? 'selected' : '' }}>Kasir
-                                </option>
-                                <option value="member" {{ old('role', $user->role) == 'member' ? 'selected' : '' }}>Member
-                                </option>
+                                <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="kasir" {{ old('role', $user->role) == 'kasir' ? 'selected' : '' }}>Kasir</option>
                             </select>
                             @if ($user->id === auth()->id())
-                                {{-- Kirim via hidden karena select di-disabled --}}
                                 <input type="hidden" name="role" value="{{ $user->role }}">
                                 <small style="color: var(--warning); font-size: 11px; margin-top: 4px; display:block;">
                                     <i class="fas fa-lock"></i> Tidak bisa mengubah role akun sendiri
                                 </small>
                             @endif
                             @error('role')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Saldo Poin (member only) --}}
-                        <div class="form-group" id="poinField"
-                            style="display: {{ old('role', $user->role) === 'member' ? 'block' : 'none' }};">
-                            <label class="form-label">Saldo Poin</label>
-                            <input type="number" name="saldo_poin"
-                                class="form-control @error('saldo_poin') is-invalid @enderror"
-                                value="{{ old('saldo_poin', $user->saldo_poin) }}" min="0">
-                            <small style="color: var(--text-secondary); font-size: 11px; margin-top: 4px; display:block;">
-                                Kosongkan untuk mempertahankan nilai saat ini
-                            </small>
-                            @error('saldo_poin')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
@@ -236,19 +216,12 @@
                 min-height: 18px;
             }
 
-            .duplicate-feedback.is-duplicate {
-                color: #dc3545;
-            }
-
-            .duplicate-feedback.is-available {
-                color: #28a745;
-            }
-
+            .duplicate-feedback.is-duplicate { color: #dc3545; }
+            .duplicate-feedback.is-available { color: #28a745; }
             .form-control.input-duplicate {
                 border-color: #dc3545;
                 box-shadow: 0 0 0 2px rgba(220, 53, 69, .15);
             }
-
             .form-control.input-available {
                 border-color: #28a745;
                 box-shadow: 0 0 0 2px rgba(40, 167, 69, .12);
@@ -258,11 +231,9 @@
 
     @push('scripts')
         <script>
-            // ── Config ───────────────────────────────────────────────────
             const CHECK_URL = "{{ route('admin.user.check-duplicate') }}";
-            const IGNORE_ID = "{{ $user->id }}"; // edit: abaikan user ini sendiri
+            const IGNORE_ID = "{{ $user->id }}";
 
-            // Nilai asli dari DB — jika value tidak berubah, langsung tandai OK tanpa hit server
             const ORIGINAL = {
                 name: "{{ addslashes(old('name', $user->name)) }}",
                 username: "{{ addslashes(old('username', $user->username)) }}",
@@ -270,50 +241,27 @@
                 no_telepon: "{{ addslashes(old('no_telepon', $user->no_telepon ?? '')) }}",
             };
 
-            const FIELDS = [{
-                    id: 'name',
-                    label: 'Nama'
-                },
-                {
-                    id: 'username',
-                    label: 'Username'
-                },
-                {
-                    id: 'email',
-                    label: 'Email'
-                },
-                {
-                    id: 'no_telepon',
-                    label: 'Nomor telepon'
-                },
+            const FIELDS = [
+                { id: 'name',       label: 'Nama' },
+                { id: 'username',   label: 'Username' },
+                { id: 'email',      label: 'Email' },
+                { id: 'no_telepon', label: 'Nomor telepon' },
             ];
 
-            // ── Debounce helper ──────────────────────────────────────────
             function debounce(fn, ms) {
                 let timer;
-                return (...args) => {
-                    clearTimeout(timer);
-                    timer = setTimeout(() => fn(...args), ms);
-                };
+                return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
             }
 
-
-            // ── Pasang listener ke setiap field ─────────────────────────
-            FIELDS.forEach(({
-                id,
-                label
-            }) => {
+            FIELDS.forEach(({ id, label }) => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 el.addEventListener('input', debounce(() => checkField(id, label), 500));
                 el.addEventListener('blur', () => checkField(id, label));
             });
 
-            // ── Blokir submit jika ada duplikat ─────────────────────────
             document.getElementById('userForm').addEventListener('submit', function(e) {
-                const hasDuplicate = FIELDS.some(({
-                    id
-                }) => {
+                const hasDuplicate = FIELDS.some(({ id }) => {
                     const input = document.getElementById(id);
                     return input && input.classList.contains('input-duplicate');
                 });
@@ -323,20 +271,16 @@
                 }
             });
 
-            // ── Role helpers ─────────────────────────────────────────────
             const roleDescriptions = {
                 admin: '<i class="fas fa-shield-alt" style="color:#dc3545;"></i> <strong>Admin</strong> — akses penuh ke seluruh sistem termasuk manajemen user dan laporan.',
                 kasir: '<i class="fas fa-cash-register" style="color:#fd7e14;"></i> <strong>Kasir</strong> — dapat melakukan transaksi penjualan dan melihat laporan terbatas.',
-                member: '<i class="fas fa-user" style="color:#28a745;"></i> <strong>Member</strong> — pelanggan terdaftar dengan fitur saldo poin dan riwayat transaksi.',
             };
 
-            function togglePoinField() {
+            function toggleRoleInfo() {
                 const role = document.getElementById('roleSelect').value;
-                const poin = document.getElementById('poinField');
                 const info = document.getElementById('roleInfo');
                 const content = document.getElementById('roleInfoContent');
 
-                poin.style.display = role === 'member' ? 'block' : 'none';
                 if (role && roleDescriptions[role]) {
                     info.style.display = 'block';
                     content.innerHTML = roleDescriptions[role];
@@ -352,7 +296,7 @@
                 icon.className = input.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             }
 
-            document.addEventListener('DOMContentLoaded', togglePoinField);
+            document.addEventListener('DOMContentLoaded', toggleRoleInfo);
         </script>
     @endpush
 @endsection
