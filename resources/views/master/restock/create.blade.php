@@ -351,7 +351,6 @@
 @endsection
 
 @push('scripts')
-    {{-- Hapus baris jQuery ini jika sudah di-load oleh layout --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -361,19 +360,17 @@
         let scanner = null;
         let scannerBusy = false;
 
-        // Map kode_produk (lowercase) -> data produk, untuk lookup hasil scan barcode
         const produkMap = {};
         @foreach ($produks as $produk)
-           // SESUDAH
-produkMap['{{ strtolower($produk->kode_produk) }}'] = {
-    id: {{ $produk->id }},
-    harga: {{ $produk->harga ?? 0 }},
-    satuan: '{{ addslashes($produk->satuan) }}',
-    stok: {{ $produk->stok ?? 0 }},
-    kode: '{{ addslashes($produk->kode_produk) }}',
-    nama: '{{ addslashes($produk->nama) }}',
-    text: '{{ addslashes($produk->nama) }} ({{ addslashes($produk->kategori->nama ?? "No Category") }})',
-};
+        produkMap['{{ strtolower($produk->kode_produk) }}'] = {
+            id: {{ $produk->id }},
+            harga: {{ $produk->harga ?? 0 }},
+            satuan: '{{ addslashes($produk->satuan) }}',
+            stok: {{ $produk->stok ?? 0 }},
+            kode: '{{ addslashes($produk->kode_produk) }}',
+            nama: '{{ addslashes($produk->nama) }}',
+            text: '{{ addslashes($produk->nama) }} ({{ addslashes($produk->kategori->nama ?? "No Category") }})',
+        };
         @endforeach
 
         /* ═══════════════ TAMBAH / HAPUS PRODUK ═══════════════ */
@@ -421,27 +418,13 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
             });
         }
 
-        /* ═══════════════ CUSTOM SEARCH: cocokkan nama & kode produk ═══════════════ */
         function matcherProduk(params, data) {
-            // Tidak ada pencarian → tampilkan semua
-            if ($.trim(params.term) === '') {
-                return data;
-            }
-
-            // Opsi kosong ("Pilih Produk") jangan pernah cocok
-            if (typeof data.element === 'undefined') {
-                return null;
-            }
-
+            if ($.trim(params.term) === '') return data;
+            if (typeof data.element === 'undefined') return null;
             const term = params.term.toLowerCase();
             const teks = (data.text || '').toLowerCase();
             const kode = (data.element.dataset.kode || '').toLowerCase();
-
-            if (teks.indexOf(term) > -1 || kode.indexOf(term) > -1) {
-                return data;
-            }
-
-            // Tidak cocok di nama maupun kode
+            if (teks.indexOf(term) > -1 || kode.indexOf(term) > -1) return data;
             return null;
         }
 
@@ -451,11 +434,10 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
             const stok = parseInt(el.dataset.stok || 0);
             const sat = el.dataset.satuan ?? '';
             const cls = stok > 5 ? 'stok-ok' : stok > 0 ? 'stok-low' : 'stok-nil';
-            const lab = `Stok: ${stok} ${sat}`;
             return $(`<span style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                   <span>${option.text}</span>
-                   <span class="stok-badge ${cls}">${lab}</span>
-                 </span>`);
+                       <span>${option.text}</span>
+                       <span class="stok-badge ${cls}">Stok: ${stok} ${sat}</span>
+                     </span>`);
         }
 
         function formatProdukSelected(option) {
@@ -468,10 +450,10 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
             const option = select.options[select.selectedIndex];
 
             if (select.value) {
-                item.querySelector('.info-kode').textContent = option.dataset.kode;
-                item.querySelector('.info-stok').textContent = option.dataset.stok;
+                item.querySelector('.info-kode').textContent   = option.dataset.kode;
+                item.querySelector('.info-stok').textContent   = option.dataset.stok;
                 item.querySelector('.info-satuan').textContent = option.dataset.satuan;
-                item.querySelector('.harga-input').value = option.dataset.harga;
+                item.querySelector('.harga-input').value       = option.dataset.harga;
                 item.querySelector('.produk-info').style.display = 'block';
                 hitungSubtotal(select);
             } else {
@@ -481,11 +463,9 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
 
         function hitungSubtotal(element) {
             const item = element.closest('.produk-item');
-            const jumlah = parseFloat(item.querySelector('.jumlah-input').value) || 0;
-            const harga = parseFloat(item.querySelector('.harga-input').value) || 0;
-            const subtotal = jumlah * harga;
-
-            item.querySelector('.info-subtotal').textContent = formatRupiah(subtotal);
+            const jumlah   = parseFloat(item.querySelector('.jumlah-input').value) || 0;
+            const harga    = parseFloat(item.querySelector('.harga-input').value)  || 0;
+            item.querySelector('.info-subtotal').textContent = formatRupiah(jumlah * harga);
             hitungTotalBiaya();
         }
 
@@ -493,27 +473,27 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
             let total = 0;
             document.querySelectorAll('.produk-item').forEach(item => {
                 const jumlah = parseFloat(item.querySelector('.jumlah-input').value) || 0;
-                const harga = parseFloat(item.querySelector('.harga-input').value) || 0;
+                const harga  = parseFloat(item.querySelector('.harga-input').value)  || 0;
                 total += jumlah * harga;
             });
             document.getElementById('totalBiaya').textContent = formatRupiah(total);
         }
 
         function formatRupiah(angka) {
-            return 'Rp ' + angka.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return 'Rp ' + angka.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
-        /* ═══════════════ SCAN BARCODE (kamera + input dari scanner produk seperti transaksi) ═══════════════ */
+        /* ═══════════════ PILIH PRODUK DARI BARCODE ═══════════════ */
         function pilihProdukDariBarcode(kodeBarcode) {
-            const key = kodeBarcode.trim().toLowerCase();
+            const key    = kodeBarcode.trim().toLowerCase();
             const produk = produkMap[key];
 
             if (!produk) {
-                showToast('❌ Produk dengan barcode "' + kodeBarcode + '" tidak ditemukan', 'error');
+                showToast('❌ Produk "' + kodeBarcode + '" tidak ditemukan', 'error');
                 return false;
             }
 
-            // Jika produk sudah ada di daftar, tambah jumlahnya saja
+            // Jika produk sudah ada di daftar → tambah jumlah saja
             const itemAda = [...document.querySelectorAll('.produk-item')].find(item => {
                 const sel = item.querySelector('.produk-select');
                 return sel && sel.value == produk.id;
@@ -521,80 +501,76 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
 
             if (itemAda) {
                 const jumlahInput = itemAda.querySelector('.jumlah-input');
-                const jumlahBaru = (parseInt(jumlahInput.value) || 0) + 1;
-                jumlahInput.value = jumlahBaru;
+                jumlahInput.value = (parseInt(jumlahInput.value) || 0) + 1;
                 hitungSubtotal(jumlahInput);
-                showToast('✅ ' + produk.nama + ' ×' + jumlahBaru, 'success');
+                showToast('✅ ' + produk.nama + ' ×' + jumlahInput.value, 'success');
                 return true;
             }
 
             // Produk belum ada — tambah baris baru
-            const item = tambahProduk();
+            const item   = tambahProduk();
             const select = item.querySelector('.produk-select');
 
-            const opt = new Option(produk.text, produk.id, true, true);
-            opt.dataset.kode = produk.kode;
-            opt.dataset.stok = produk.stok;
-            opt.dataset.harga = produk.harga;
-            opt.dataset.satuan = produk.satuan;
-            select.appendChild(opt);
-            $(select).val(produk.id).trigger('change');
+            // Buat option baru dengan data-* lengkap lalu set ke Select2
+            const opt           = new Option(produk.text, produk.id, true, true);
+            opt.dataset.kode    = produk.kode;
+            opt.dataset.stok    = produk.stok;
+            opt.dataset.harga   = produk.harga;
+            opt.dataset.satuan  = produk.satuan;
 
-            updateProdukInfo(select);
-            item.querySelector('.jumlah-input').value = 1;
-            hitungSubtotal(item.querySelector('.jumlah-input'));
+            // Hapus option kosong default, sisipkan option produk
+            $(select).empty().append(opt).val(produk.id).trigger('change');
+
+            // ✅ FIX: panggil updateProdukInfo langsung via native select
+            // setelah Select2 selesai memproses trigger('change')
+            setTimeout(() => {
+                updateProdukInfo(select);
+                item.querySelector('.jumlah-input').value = 1;
+                hitungSubtotal(item.querySelector('.jumlah-input'));
+            }, 50);
 
             showToast('✅ ' + produk.nama + ' ditambahkan', 'success');
             return true;
         }
 
-        document.getElementById('btnScanBarcode').addEventListener('click', function() {
-            document.getElementById('scannerModal').classList.add('active');
-            bukaScanner();
-        });
+        /* ═══════════════ SCANNER KAMERA ═══════════════ */
+        // Hanya pasang listener jika tombol scan kamera tersedia di DOM
+        const btnScan = document.getElementById('btnScanBarcode');
+        if (btnScan) {
+            btnScan.addEventListener('click', function () {
+                document.getElementById('scannerModal').classList.add('active');
+                bukaScanner();
+            });
+        }
 
         function bukaScanner() {
             if (scanner) return;
             scanner = new Html5Qrcode('scannerReader');
-            scanner.start({
-                    facingMode: 'environment'
-                }, {
-                    fps: 10,
-                    qrbox: {
-                        width: 280,
-                        height: 120
-                    },
-                    aspectRatio: 1.777778
-                },
-                function(decodedText) {
+            scanner.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 280, height: 120 }, aspectRatio: 1.777778 },
+                function (decodedText) {
                     if (scannerBusy) return;
                     scannerBusy = true;
-
                     tampilkanHasilScanner('⏳ Mencari: ' + decodedText, '#fef3c7', '#92400e');
                     const ok = pilihProdukDariBarcode(decodedText);
-
-                    if (ok) {
-                        tampilkanHasilScanner('✅ Produk ditemukan & ditambahkan!', '#d1fae5', '#065f46');
-                        try {
-                            const ctx = new(window.AudioContext || window.webkitAudioContext)();
-                            const o = ctx.createOscillator();
-                            o.connect(ctx.destination);
-                            o.frequency.value = 880;
-                            o.start();
-                            o.stop(ctx.currentTime + 0.08);
-                        } catch (e) {}
-                    } else {
-                        tampilkanHasilScanner('❌ Produk tidak ditemukan: ' + decodedText, '#fee2e2', '#991b1b');
-                    }
-
-                    setTimeout(() => {
-                        scannerBusy = false;
-                        document.getElementById('scannerResult').style.display = 'none';
-                    }, 1500);
+                    tampilkanHasilScanner(
+                        ok ? '✅ Produk ditemukan & ditambahkan!' : '❌ Produk tidak ditemukan: ' + decodedText,
+                        ok ? '#d1fae5' : '#fee2e2',
+                        ok ? '#065f46' : '#991b1b'
+                    );
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const o = ctx.createOscillator();
+                        o.connect(ctx.destination);
+                        o.frequency.value = 880;
+                        o.start(); o.stop(ctx.currentTime + 0.08);
+                    } catch (e) {}
+                    setTimeout(() => { scannerBusy = false; document.getElementById('scannerResult').style.display = 'none'; }, 1500);
                 },
-                function() {}
-            ).catch(function() {
-                showToast('Tidak dapat mengakses kamera. Izinkan akses kamera di browser.', 'error');
+                function () {}
+            ).catch(function () {
+                showToast('Tidak dapat mengakses kamera.', 'error');
                 tutupScanner();
             });
         }
@@ -602,32 +578,26 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
         function tutupScanner() {
             document.getElementById('scannerModal').classList.remove('active');
             if (scanner) {
-                scanner.stop().then(() => {
-                    scanner.clear();
-                    scanner = null;
-                }).catch(() => {});
+                scanner.stop().then(() => { scanner.clear(); scanner = null; }).catch(() => {});
             }
             scannerBusy = false;
         }
 
-        function tampilkanHasilScanner(pesan, bgColor, textColor) {
+        function tampilkanHasilScanner(pesan, bg, clr) {
             const el = document.getElementById('scannerResult');
-            el.innerHTML = pesan;
-            el.style.background = bgColor;
-            el.style.color = textColor;
-            el.style.display = 'block';
+            el.innerHTML = pesan; el.style.background = bg; el.style.color = clr; el.style.display = 'block';
         }
 
-        document.getElementById('scannerModal').addEventListener('click', function(e) {
+        document.getElementById('scannerModal').addEventListener('click', function (e) {
             if (e.target === this) tutupScanner();
         });
 
-        // Scanner USB/Bluetooth (ketik cepat + Enter), sama seperti di transaksi
-        (function() {
+        /* ═══════════════ SCANNER USB / BLUETOOTH ═══════════════ */
+        (function () {
             let buffer = '';
-            let timer = null;
+            let timer  = null;
 
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 const tag = document.activeElement.tagName;
                 if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
                 if (document.getElementById('scannerModal').classList.contains('active')) return;
@@ -642,42 +612,38 @@ produkMap['{{ strtolower($produk->kode_produk) }}'] = {
                 if (e.key.length === 1) {
                     buffer += e.key;
                     if (timer) clearTimeout(timer);
-                    timer = setTimeout(() => {
-                        buffer = '';
-                    }, 200);
+                    timer = setTimeout(() => { buffer = ''; }, 200);
                 }
             });
         })();
 
+        /* ═══════════════ TOAST ═══════════════ */
         function showToast(msg, type = 'success') {
             const old = document.getElementById('restockToast');
             if (old) old.remove();
-
             const toast = document.createElement('div');
             toast.id = 'restockToast';
             toast.style.cssText = `
-           position:fixed; bottom:24px; right:24px; z-index:99999;
-           background:${type === 'success' ? '#065f46' : '#991b1b'};
-           color:white; padding:12px 20px; border-radius:10px;
-           font-size:14px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.2);
-           animation:toastIn 0.3s ease; max-width:320px;
-       `;
+                position:fixed; bottom:24px; right:24px; z-index:99999;
+                background:${type === 'success' ? '#065f46' : '#991b1b'};
+                color:white; padding:12px 20px; border-radius:10px;
+                font-size:14px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.2);
+                animation:toastIn 0.3s ease; max-width:320px;
+            `;
             toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>${msg}`;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2500);
         }
 
         /* ═══════════════ VALIDASI & INIT ═══════════════ */
-        document.getElementById('restockForm').addEventListener('submit', function(e) {
-            const produkItems = document.querySelectorAll('.produk-item');
-            if (produkItems.length === 0) {
+        document.getElementById('restockForm').addEventListener('submit', function (e) {
+            if (document.querySelectorAll('.produk-item').length === 0) {
                 e.preventDefault();
                 alert('Tambahkan minimal 1 produk!');
-                return false;
             }
         });
 
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             tambahProduk();
         });
     </script>
