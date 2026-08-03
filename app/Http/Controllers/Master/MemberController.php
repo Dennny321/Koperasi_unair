@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = User::member();
@@ -32,17 +29,11 @@ class MemberController extends Controller
         return view('master.member.index', compact('members'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('master.member.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -53,7 +44,7 @@ class MemberController extends Controller
         User::create([
             'name'       => $validated['name'],
             'no_telepon' => $validated['no_telepon'],
-            'password'   => $validated['no_telepon'], // password = no_telepon (auto-hashed via cast)
+            'password'   => $validated['no_telepon'],
             'role'       => 'member',
             'saldo_poin' => 0,
         ]);
@@ -63,26 +54,17 @@ class MemberController extends Controller
             ->with('success', 'Member berhasil ditambahkan!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $member)
     {
         $member->load('transaksiSebagaiMember', 'riwayatPoin', 'penukaran');
         return view('master.member.show', compact('member'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(User $member)
     {
         return view('master.member.edit', compact('member'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, User $member)
     {
         $validated = $request->validate([
@@ -107,9 +89,8 @@ class MemberController extends Controller
             'no_telepon' => $validated['no_telepon'],
         ];
 
-        // Hanya update password jika diisi
         if (!empty($validated['new_password'])) {
-            $data['password'] = $validated['new_password']; // auto-hashed via cast
+            $data['password'] = $validated['new_password'];
         }
 
         $member->update($data);
@@ -119,9 +100,6 @@ class MemberController extends Controller
             ->with('success', 'Data member berhasil diperbarui!');
     }
 
-    /**
-     * Reset password member menjadi no_telepon.
-     */
     public function resetPassword(User $member)
     {
         $member->update([
@@ -133,15 +111,20 @@ class MemberController extends Controller
             ->with('success', 'Password member berhasil direset ke nomor telepon!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $member)
+    public function destroy(Request $request, User $member)
     {
+        $routePrefix = auth()->user()->role === 'admin' ? 'admin' : 'kasir';
+
+        // Hapus semua relasi terlebih dahulu untuk menghindari FK constraint
+        $member->penukaran()->delete();
+        $member->riwayatPoin()->delete();
+
+        // Set id_member ke null agar histori transaksi tetap tersimpan
+        $member->transaksiSebagaiMember()->update(['id_member' => null]);
+
         $member->delete();
 
-        $routePrefix = auth()->user()->role === 'admin' ? 'admin' : 'kasir';
         return redirect()->route("{$routePrefix}.member.index")
-            ->with('success', 'Member berhasil dihapus!');
+            ->with('success', "Member \"{$member->name}\" berhasil dihapus beserta seluruh data terkait.");
     }
 }
