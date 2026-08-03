@@ -2,6 +2,7 @@
 
 @section('title', 'Edit Surat Jalan — ' . $suratJalan->no_surat)
 @section('breadcrumb', 'Data / Surat Jalan / Edit')
+@section('page-title', 'Surat Jalan')
 
 @push('styles')
     {{-- Select2 — hanya untuk halaman ini --}}

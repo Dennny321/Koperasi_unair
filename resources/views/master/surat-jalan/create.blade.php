@@ -2,6 +2,7 @@
 
 @section('title', 'Buat Surat Jalan')
 @section('breadcrumb', 'Data / Surat Jalan / Buat')
+@section('page-title', 'Buat Surat Jalan')
 
 @push('styles')
     {{-- Select2 — hanya untuk halaman ini --}}

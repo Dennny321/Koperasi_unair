@@ -2,6 +2,7 @@
 
 @section('title', 'Surat Jalan - Koperasi UNAIR')
 @section('breadcrumb', 'Data / Surat Jalan')
+@section('page-title', 'Surat Jalan')
 
 @push('styles')
 <style>

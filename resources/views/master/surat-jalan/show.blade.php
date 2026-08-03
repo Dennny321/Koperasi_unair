@@ -2,6 +2,7 @@
 
 @section('title', 'Detail Surat Jalan — ' . $suratJalan->no_surat)
 @section('breadcrumb', 'Data / Surat Jalan / Detail')
+@section('page-title', 'Detail Surat Jalan')
 
 @section('content')
 @php $rp = auth()->user()->role === 'admin' ? 'admin' : 'kasir'; @endphp
