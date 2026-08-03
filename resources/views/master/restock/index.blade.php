@@ -118,8 +118,7 @@
                             <td>{{ $restocks->firstItem() + $loop->index }}</td>
                             <td><strong>{{ $item->kode_restock }}</strong></td>
                             <td>
-                                <i class="fas fa-calendar" style="color: var(--info);"></i>
-                                {{ $item->tanggal_restock_formatted }}
+                                    {{ $item->tanggal_restock ? \Carbon\Carbon::parse($item->tanggal_restock)->translatedFormat('d M Y') : '-' }}
                             </td>
                             <td>
                                 @if ($item->supplier)
