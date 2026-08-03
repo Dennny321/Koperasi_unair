@@ -79,17 +79,6 @@
         </form>
     </div>
 
-    {{-- ── FLASH MESSAGES ── --}}
-    @if (session('success'))
-        <div class="alert alert-success" style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger" style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
-            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-        </div>
-    @endif
 
     {{-- ── TABLE CARD ── --}}
     <div class="card">

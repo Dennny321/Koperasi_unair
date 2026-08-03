@@ -27,9 +27,9 @@ class HadiahController extends Controller
             $query->where('nama', 'like', '%' . $request->search . '%');
         }
 
-        $perPage = in_array((int) $request->get('per_page', 5), [5, 10, 25, 50, 100])
-            ? (int) $request->get('per_page', 5)
-            : 5;
+        $perPage = in_array((int) $request->get('per_page', 10), [10, 25, 50, 100])
+            ? (int) $request->get('per_page', 10)
+            : 10;
 
         $perPagePenukaran = in_array((int) $request->get('per_page_penukaran', 5), [5, 10, 25, 50, 100])
             ? (int) $request->get('per_page_penukaran', 5)

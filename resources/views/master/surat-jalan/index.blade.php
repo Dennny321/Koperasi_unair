@@ -111,7 +111,7 @@
         border-radius: 20px;
         padding: 24px 28px;
         margin-bottom: 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         border: 1px solid #f1f5f9;
     }
 
@@ -208,7 +208,7 @@
         background: #fff;
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         border: 1px solid #f1f5f9;
     }
 
@@ -453,20 +453,7 @@
     </a>
 </div>
 
-{{-- ALERTS --}}
-@if(session('success'))
-<div class="alert-success">
-    <i class="fas fa-check-circle"></i>
-    <span>{{ session('success') }}</span>
-</div>
-@endif
 
-@if(session('error'))
-<div class="alert-error">
-    <i class="fas fa-exclamation-circle"></i>
-    <span>{{ session('error') }}</span>
-</div>
-@endif
 
 {{-- FILTER SECTION --}}
 <div class="filter-section">
@@ -546,18 +533,18 @@
                 </td>
                 <td>
                     @php
-                        $badgeClass = match($item->status) {
-                            'draft'   => 'badge-draft',
-                            'dicetak' => 'badge-dicetak',
-                            'selesai' => 'badge-selesai',
-                            default   => 'badge-draft',
-                        };
-                        $statusLabel = match($item->status) {
-                            'draft'   => 'Draft',
-                            'dicetak' => 'Dicetak',
-                            'selesai' => 'Selesai',
-                            default   => ucfirst($item->status),
-                        };
+                    $badgeClass = match($item->status) {
+                    'draft' => 'badge-draft',
+                    'dicetak' => 'badge-dicetak',
+                    'selesai' => 'badge-selesai',
+                    default => 'badge-draft',
+                    };
+                    $statusLabel = match($item->status) {
+                    'draft' => 'Draft',
+                    'dicetak' => 'Dicetak',
+                    'selesai' => 'Selesai',
+                    default => ucfirst($item->status),
+                    };
                     @endphp
                     <span class="badge {{ $badgeClass }}">{{ $statusLabel }}</span>
                 </td>
@@ -575,19 +562,21 @@
                             <i class="fas fa-print"></i>
                         </a>
                         @if($item->status === 'draft')
-                            <a href="{{ route($rp.'.surat-jalan.edit', $item) }}"
-                                class="btn-sm btn-warning" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route($rp.'.surat-jalan.destroy', $item) }}" method="POST"
-                                style="display:inline;"
-                                onsubmit="return confirm('Hapus surat jalan ini?')">
-                                @csrf @method('DELETE')
-                                <button class="btn-sm btn-danger" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+                        <a href="{{ route($rp.'.surat-jalan.edit', $item) }}"
+                            class="btn-sm btn-warning" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
                         @endif
+
+                        {{-- Tombol hapus muncul untuk semua status --}}
+                        <form action="{{ route($rp.'.surat-jalan.destroy', $item) }}" method="POST"
+                            style="display:inline;"
+                            onsubmit="return confirmHapus(event, '{{ $item->no_surat }}', '{{ $item->status }}')">
+                            @csrf @method('DELETE')
+                            <button class="btn-sm btn-danger" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     </div>
                 </td>
             </tr>
@@ -612,3 +601,23 @@
 </div>
 
 @endsection
+@push('scripts')
+<script>
+    function confirmHapus(e, noSurat, status) {
+        e.preventDefault();
+        const form = e.target.closest('form');
+
+        let pesan = `Hapus surat jalan ${noSurat}?`;
+
+        if (status === 'dicetak') {
+            pesan = `Surat jalan ${noSurat} sudah dicetak.\n\nStok produk akan dikembalikan otomatis.\nYakin ingin menghapus?`;
+        } else if (status === 'selesai') {
+            pesan = `Surat jalan ${noSurat} sudah selesai.\n\nData akan dihapus permanen (stok TIDAK dikembalikan).\nYakin ingin menghapus?`;
+        }
+
+        if (confirm(pesan)) {
+            form.submit();
+        }
+    }
+</script>
+@endpush

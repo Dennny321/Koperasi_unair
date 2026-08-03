@@ -38,9 +38,9 @@ class ProdukController extends Controller
             });
         }
 
-        $perPage = in_array((int) $request->get('per_page', 5), [5, 10, 25, 50, 100])
-            ? (int) $request->get('per_page', 5)
-            : 5;
+        $perPage = in_array((int) $request->get('per_page', 10), [10, 25, 50, 100])
+            ? (int) $request->get('per_page', 10)
+            : 10;
 
         $produk    = $query->latest()->paginate($perPage)->withQueryString();
         $kategoris = KategoriProduk::all();

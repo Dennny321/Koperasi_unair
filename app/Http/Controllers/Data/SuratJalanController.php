@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class SuratJalanController extends Controller
 {
-    /**
-     * Daftar semua surat jalan.
-     */
     public function index(Request $request)
     {
         $query = TransaksiSuratJalan::with('kasir')
@@ -32,8 +29,8 @@ class SuratJalanController extends Controller
             $query->where('status', $request->status);
         }
 
-        $perPage = in_array((int) $request->get('per_page', 5), [5, 10, 25, 50, 100])
-            ? (int) $request->get('per_page', 5)
+        $perPage = in_array((int) $request->get('per_page', 10), [10, 25, 50, 100])
+            ? (int) $request->get('per_page', 10)
             : 5;
 
         $suratJalan = $query->orderByDesc('created_at')->paginate($perPage)->withQueryString();
@@ -41,18 +38,12 @@ class SuratJalanController extends Controller
         return view('master.surat-jalan.index', compact('suratJalan'));
     }
 
-    /**
-     * Form buat surat jalan baru.
-     */
     public function create()
     {
         $produk = Produk::aktif()->orderBy('nama')->get();
         return view('master.surat-jalan.create', compact('produk'));
     }
 
-    /**
-     * Simpan surat jalan baru.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -66,8 +57,6 @@ class SuratJalanController extends Controller
             'produk.*.harga_satuan' => 'required|numeric|min:0',
         ]);
 
-        // ── Validasi stok sebelum transaksi dimulai ──
-        // ── Validasi stok sebelum transaksi dimulai ──
         $stokErrors = [];
         foreach ($request->produk as $item) {
             $produk = Produk::find($item['id_produk']);
@@ -97,20 +86,18 @@ class SuratJalanController extends Controller
                 $total   += $subtotal;
 
                 DetailTransaksiSuratJalan::create([
-                    'id_transaksi'  => $sj->id,
-                    'id_produk'     => $item['id_produk'],
-                    'jumlah'        => $item['jumlah'],
-                    'harga_satuan'  => $item['harga_satuan'],
-                    'subtotal'      => $subtotal,
+                    'id_transaksi' => $sj->id,
+                    'id_produk'    => $item['id_produk'],
+                    'jumlah'       => $item['jumlah'],
+                    'harga_satuan' => $item['harga_satuan'],
+                    'subtotal'     => $subtotal,
                 ]);
 
-                // ── Kurangi stok produk ──
                 Produk::where('id', $item['id_produk'])
                     ->decrement('stok', $item['jumlah']);
             }
 
             $sj->update(['total_harga' => $total]);
-
             DB::commit();
 
             $rp = auth()->user()->role === 'admin' ? 'admin' : 'kasir';
@@ -123,9 +110,6 @@ class SuratJalanController extends Controller
         }
     }
 
-    /**
-     * Detail surat jalan.
-     */
     public function show($id)
     {
         $suratJalan = TransaksiSuratJalan::with(['kasir', 'detail.produk'])
@@ -134,9 +118,6 @@ class SuratJalanController extends Controller
         return view('master.surat-jalan.show', compact('suratJalan'));
     }
 
-    /**
-     * Form edit surat jalan (hanya status draft).
-     */
     public function edit($id)
     {
         $suratJalan = TransaksiSuratJalan::with('detail.produk')->findOrFail($id);
@@ -151,15 +132,11 @@ class SuratJalanController extends Controller
         return view('master.surat-jalan.edit', compact('suratJalan', 'produk'));
     }
 
-    /**
-     * Update surat jalan.
-     */
     public function update(Request $request, $id)
     {
         $suratJalan = TransaksiSuratJalan::findOrFail($id);
         $rp = auth()->user()->role === 'admin' ? 'admin' : 'kasir';
 
-        // Handle tombol "Tandai Selesai"
         if ($request->has('_status_override') && $request->_status_override === 'selesai') {
             $suratJalan->update(['status' => 'selesai']);
             return redirect()->route($rp . '.surat-jalan.show', $suratJalan->id)
@@ -186,7 +163,6 @@ class SuratJalanController extends Controller
                 'keterangan' => $request->keterangan,
             ]);
 
-            // Hapus detail lama, buat ulang
             $suratJalan->detail()->delete();
 
             $total = 0;
@@ -195,11 +171,11 @@ class SuratJalanController extends Controller
                 $total   += $subtotal;
 
                 DetailTransaksiSuratJalan::create([
-                    'id_transaksi'  => $suratJalan->id,
-                    'id_produk'     => $item['id_produk'],
-                    'jumlah'        => $item['jumlah'],
-                    'harga_satuan'  => $item['harga_satuan'],
-                    'subtotal'      => $subtotal,
+                    'id_transaksi' => $suratJalan->id,
+                    'id_produk'    => $item['id_produk'],
+                    'jumlah'       => $item['jumlah'],
+                    'harga_satuan' => $item['harga_satuan'],
+                    'subtotal'     => $subtotal,
                 ]);
             }
 
@@ -215,27 +191,38 @@ class SuratJalanController extends Controller
     }
 
     /**
-     * Hapus surat jalan (hanya draft).
+     * Hapus surat jalan — semua status bisa dihapus.
+     * Stok dikembalikan jika status bukan selesai.
      */
     public function destroy($id)
     {
-        $suratJalan = TransaksiSuratJalan::findOrFail($id);
+        $suratJalan = TransaksiSuratJalan::with('detail')->findOrFail($id);
 
-        if ($suratJalan->status !== 'draft') {
-            return back()->with('error', 'Hanya surat jalan berstatus draft yang bisa dihapus.');
+        DB::beginTransaction();
+        try {
+            // Kembalikan stok jika surat jalan belum selesai
+            // (draft & dicetak berarti barang belum benar-benar diterima)
+            if ($suratJalan->status !== 'selesai') {
+                foreach ($suratJalan->detail as $detail) {
+                    Produk::where('id', $detail->id_produk)
+                        ->increment('stok', $detail->jumlah);
+                }
+            }
+
+            $suratJalan->detail()->delete();
+            $suratJalan->delete();
+
+            DB::commit();
+
+            $rp = auth()->user()->role === 'admin' ? 'admin' : 'kasir';
+            return redirect()->route($rp . '.surat-jalan.index')
+                ->with('success', 'Surat jalan berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menghapus: ' . $e->getMessage());
         }
-
-        $suratJalan->detail()->delete();
-        $suratJalan->delete();
-
-        $rp = auth()->user()->role === 'admin' ? 'admin' : 'kasir';
-        return redirect()->route($rp . '.surat-jalan.index')
-            ->with('success', 'Surat jalan berhasil dihapus.');
     }
 
-    /**
-     * Halaman cetak surat jalan.
-     */
     public function cetak($id)
     {
         $suratJalan = TransaksiSuratJalan::with(['kasir', 'detail.produk'])
@@ -248,9 +235,6 @@ class SuratJalanController extends Controller
         return view('master.surat-jalan.cetak', compact('suratJalan'));
     }
 
-    /**
-     * Cari produk (AJAX autocomplete di form create/edit).
-     */
     public function cariProduk(Request $request)
     {
         $q = $request->get('q', '');

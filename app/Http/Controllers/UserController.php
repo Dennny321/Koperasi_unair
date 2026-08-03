@@ -34,9 +34,9 @@ class UserController extends Controller
         }
 
         // ✅ Ambil per_page dari request, default 10, max 100
-        $perPage = in_array((int) $request->get('per_page', 5), [10, 25, 50, 100])
-            ? (int) $request->get('per_page', 5)
-            : 5;
+        $perPage = in_array((int) $request->get('per_page', 10), [ 10, 25, 50, 100])
+            ? (int) $request->get('per_page', 10)
+            : 10;
 
         $users = $query->latest()->paginate($perPage)->withQueryString();
 

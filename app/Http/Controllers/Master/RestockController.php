@@ -42,8 +42,8 @@ class RestockController extends Controller
             });
         }
 
-        $perPage = in_array((int) $request->get('per_page', 5), [5, 10, 25, 50, 100])
-            ? (int) $request->get('per_page', 5)
+        $perPage = in_array((int) $request->get('per_page', 10), [10, 25, 50, 100])
+            ? (int) $request->get('per_page', 10)
             : 5;
 
         $restocks  = $query->latest('tanggal_restock')->paginate($perPage)->withQueryString();
